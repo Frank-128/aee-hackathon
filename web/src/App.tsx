@@ -11,6 +11,9 @@ import Register from "./pages/Register";
 // farmer imports
 import FarmerDashboard from "./pages/farmer/farmerDashboard";
 import FarmerProducts from "./pages/farmer/farmerProducts"; 
+import NearByFarmers from "./pages/farmer/nearbyFarmers"
+import NearbyFarmerProfile from "./pages/farmer/nearbyFarmerDetail";
+
 import { 
   FarmerHelp,
   FarmerDelivery,
@@ -74,7 +77,9 @@ const App = () => (
         <Route path="/farmer/orders/:orderId" element={<FarmerOrderDetails />} />
 
         <Route path="/farmer/earnings" element={<FarmerEarnings />} />
-        <Route path="/farmer/nearby-farmers" element={<FarmerDashboard />} />
+        <Route path="/farmer/nearby-farmers" element={<NearByFarmers />} />
+        <Route path="/farmer/nearby-farmers/:id" element={<NearbyFarmerProfile />} />
+
         <Route path="/farmer/inventory" element={<FarmerInventory />} />
         <Route path="/farmer/delivery" element={<FarmerDelivery />} />
         <Route path="/farmer/orders" element={<FarmerOrders />} />

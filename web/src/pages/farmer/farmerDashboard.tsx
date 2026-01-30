@@ -62,24 +62,33 @@ const allLoans = [
 ];
 
 export default function CustomerDashboard() {
+  // 🔒 ALL HOOKS FIRST — NO EXCEPTIONS
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState<
+    "all" | "personal" | "business" | "home"
+  >("all");
+
+  const resolvedUser = user;
+
+  // ✅ THEN conditional rendering
   if (isLoading) {
     return (
       <ResponsiveLayout title="Dashboard">
-        <div className="flex items-center justify-center h-[60vh]">
-          <p className="text-muted-foreground">Loading dashboard…</p>
+        <div className="flex justify-center py-20">
+          Loading dashboard…
         </div>
       </ResponsiveLayout>
     );
   }
 
-  if (!user) {
+  if (!resolvedUser) {
     return (
       <ResponsiveLayout title="Dashboard">
-        <div className="flex items-center justify-center h-[60vh] flex-col gap-3">
-          <p className="text-muted-foreground">You are not logged in</p>
+        <div className="flex flex-col items-center py-20 gap-3">
+          <p>You are not logged in</p>
           <Button onClick={() => navigate("/login")}>
             Go to Login
           </Button>
@@ -87,44 +96,6 @@ export default function CustomerDashboard() {
       </ResponsiveLayout>
     );
   }
-
-
-  // ✅ DEFAULT USER FOR TESTING
-  const resolvedUser = user;
-
-
-  const primaryAccount = accounts[0];
-
-  const pendingTransactions = transactions.filter(
-    t => t.status === "pending"
-  ).length;
-
-    // ---------------- LOAN SEARCH STATE ----------------
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<
-    "all" | "personal" | "business" | "home"
-  >("all");
-
-  const filteredLoans = allLoans.filter((loan) => {
-    const matchesSearch =
-      loan.bank.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loan.type.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesFilter =
-      filter === "all" || loan.type.toLowerCase().includes(filter);
-
-    return matchesSearch && matchesFilter;
-  });
-
-  const { loginDemo } = useAuth();
-
-  const handleLogin = () => {
-  loginDemo("farmer@test.com", "farmer");
-  console.log("LOGIN CALLED");
-  };
-
-
-
 
   return (
   <ResponsiveLayout title="Dashboard">
