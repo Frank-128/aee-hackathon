@@ -46,7 +46,12 @@ app/.idea/
 app/*.iml
 app/.vscode/
 
+# IntelliJ / Android Studio
+**/*.iml
+
 # Android (generated / local)
+
+
 app/android/.gradle/
 app/android/local.properties
 app/android/**/GeneratedPluginRegistrant.java
