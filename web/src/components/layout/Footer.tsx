@@ -14,7 +14,7 @@ const Footer = () => {
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="font-display font-bold text-lg text-foreground">
-              AGRI CONNECT
+              RIHNO
             </span>
             </div>
             <p className="text-muted-foreground text-sm">
