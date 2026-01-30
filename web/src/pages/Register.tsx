@@ -141,10 +141,14 @@ const Register = () => {
       return;
     }
 
+    
+
     toast({
       title: "Registration successful",
       description: `Account created as ${role}`,
     });
+
+
 
     navigate("/login");
   };
@@ -197,8 +201,6 @@ const Register = () => {
                   <Input className={inputClass} placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                 </div>
 
-                <Input className={inputClass} placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} />
-                <Input className={inputClass} type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
                 <Input className={inputClass} placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} />
                 
                 {/* STATE */}

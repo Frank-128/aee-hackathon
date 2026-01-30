@@ -15,7 +15,6 @@ import NearByFarmers from "./pages/farmer/nearbyFarmers";
 import NearbyFarmerProfile from "./pages/farmer/nearbyFarmerDetail";
 import FarmerInsights from "./pages/farmer/farmerMarketInsights";
 import FarmerProfile from "./pages/farmer/farmerProfile";
-
 import { 
   FarmerHelp,
   FarmerDelivery,
@@ -32,17 +31,17 @@ import {
 
 
 // consumer imports
-import { 
-  BuyerDashboard,
-  BuyerFarmers,
-  BuyerMarket,
-  BuyerOrders,
-  BuyerReviews,
-  BuyerTracking,
-  BuyerWishlist
-} from "./pages/buyers/buyerDashboard";
+import {BuyerDashboard} from "./pages/buyers/buyerDashboard";
+import {BuyerFarmers } from "./pages/buyers/buyerFarmers";
+import BuyerInvoices from "./pages/buyers/buyerInvoice";
+import {  } from "./pages/buyers/buyerOrder";
+import { } from "./pages/buyers/buyerReviews";
 
-// farmer imports
+import BuyerProfile from "./pages/buyers/buyerProfile";
+import BuyerInvoice from "./pages/buyers/buyerInvoice"
+import BuyerMessages from "./pages/buyers/buyerMessages"
+
+// admin imports
 import { 
   AdminAnalytics, 
   AdminBuyers,
@@ -96,13 +95,14 @@ const App = () => (
         <Route path="/buyer/dashboard" element={<BuyerDashboard />} />
         <Route path="/buyer/market" element={<BuyerMarket />} />
         <Route path="/buyer/orders" element={<BuyerOrders />} />
-        <Route path="/buyer/messages" element={<BuyerDashboard />} />
+        <Route path="/buyer/messages" element={<BuyerMessages />} />
         <Route path="/buyer/wishlist" element={<BuyerWishlist />} />
-        <Route path="/buyer/invoices" element={<BuyerDashboard />} />
+        <Route path="/buyer/invoices" element={<BuyerInvoice />} />
+        <Route path="/buyer/payments" element={<BuyerInvoice />} />
         <Route path="/buyer/tracking" element={<BuyerTracking />} />
         <Route path="/buyer/reviews" element={<BuyerReviews />} />
         <Route path="/buyer/farmers" element={<BuyerFarmers />} />
-        <Route path="/buyer/profile" element={<BuyerFarmers />} />
+        <Route path="/buyer/profile" element={<BuyerProfile />} />
         
 
         {/* Admin Routes */}

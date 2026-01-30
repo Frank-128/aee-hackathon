@@ -474,62 +474,6 @@ export function FarmerDelivery() {
   );
 }
 
-/* ============ MARKET INSIGHTS PAGE ============ */
-export function FarmerInsights() {
-  const marketData = [
-    { crop: "Rice", price: "₹3,450/kg", trend: "↑ +8%", demand: "High" },
-    { crop: "Wheat", price: "₹2,150/q", trend: "↑ +4%", demand: "Medium" },
-    { crop: "Tomatoes", price: "₹24/kg", trend: "↓ -2%", demand: "High" },
-  ];
-
-  return (
-    <ResponsiveLayout title="Market Insights">
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-emerald-600" />
-              Live Market Prices
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {marketData.map((item) => (
-                <div key={item.crop} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                  <div>
-                    <p className="font-semibold">{item.crop}</p>
-                    <p className="text-sm text-muted-foreground">Demand: {item.demand}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-emerald-600">{item.price}</p>
-                    <p className="text-sm text-emerald-600">{item.trend}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>AI Recommendations</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <p className="font-semibold text-emerald-900">Good Time to Sell Wheat</p>
-              <p className="text-sm text-emerald-700 mt-1">Prices are up 4% - harvest and sell within 5 days for best rates</p>
-            </div>
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="font-semibold text-amber-900">Tomato Prices Falling</p>
-              <p className="text-sm text-amber-700 mt-1">Oversupply in market - wait 2 weeks before selling</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </ResponsiveLayout>
-  );
-}
-
 /* ============ WEATHER ALERTS PAGE ============ */
 export function FarmerWeather() {
   const weatherAlerts = [
