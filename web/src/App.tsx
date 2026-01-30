@@ -11,15 +11,16 @@ import Register from "./pages/Register";
 // farmer imports
 import FarmerDashboard from "./pages/farmer/farmerDashboard";
 import FarmerProducts from "./pages/farmer/farmerProducts"; 
-import NearByFarmers from "./pages/farmer/nearbyFarmers"
+import NearByFarmers from "./pages/farmer/nearbyFarmers";
 import NearbyFarmerProfile from "./pages/farmer/nearbyFarmerDetail";
+import FarmerInsights from "./pages/farmer/farmerMarketInsights";
+import FarmerProfile from "./pages/farmer/farmerProfile";
 
 import { 
   FarmerHelp,
   FarmerDelivery,
   FarmerEarnings,
   FarmerFarmProfile,
-  FarmerInsights,
   FarmerLearn,
   FarmerInventory,FarmerNotifications,
   FarmerWeather,
@@ -89,6 +90,7 @@ const App = () => (
         <Route path="/farmer/notifications" element={<FarmerNotifications />} />
         <Route path="/farmer/messages" element={<FarmerMessages />} />
         <Route path="/farmer/help" element={<FarmerHelp />} />
+        <Route path="/farmer/profile" element={<FarmerProfile />} />
 
         {/* Buyer Routes */}
         <Route path="/buyer/dashboard" element={<BuyerDashboard />} />

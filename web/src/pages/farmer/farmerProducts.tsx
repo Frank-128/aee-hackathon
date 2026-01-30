@@ -5,6 +5,7 @@ import {
   Sprout,
   Sparkles,
   ArrowRight,
+  Trash2,
 } from "lucide-react";
 
 import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
@@ -63,7 +64,6 @@ export default function FarmerProducts() {
     setProducts(updated);
     localStorage.setItem("farmer_products", JSON.stringify(updated));
 
-    // reset form
     setQuantity("");
     setCrop("wheat");
     setShowAddForm(false);
@@ -202,21 +202,24 @@ export default function FarmerProducts() {
                         </div>
                       </div>
 
-                      <div className="text-right space-y-2">
-                        <p className="font-semibold">
-                          ₹{p.priceMin} – ₹{p.priceMax}
-                        </p>
-                        <Badge className="bg-emerald-100 text-emerald-700">
-                          Active
-                        </Badge>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="w-full"
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="font-semibold">
+                            ₹{p.priceMin} – ₹{p.priceMax}
+                          </p>
+                          <Badge className="bg-emerald-100 text-emerald-700 mt-1">
+                            Active
+                          </Badge>
+                        </div>
+
+                        {/* Delete icon */}
+                        <button
                           onClick={() => handleDeleteProduct(p.id)}
+                          title="Delete product"
+                          className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition"
                         >
-                          Delete
-                        </Button>
+                          <Trash2 className="w-5 h-5" />
+                        </button>
                       </div>
                     </CardContent>
                   </Card>
@@ -230,5 +233,3 @@ export default function FarmerProducts() {
     </ResponsiveLayout>
   );
 }
-
-
