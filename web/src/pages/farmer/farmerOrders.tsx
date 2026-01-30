@@ -1,126 +1,144 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Wallet,
-  ArrowUpRight,
-  ArrowDownLeft,
-  CreditCard,
-  Clock,
-  MapPin,
-  TrendingUp,
-  FileText,
-} from "lucide-react";
-
-import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
-import { ActionCard } from "@/components/common/ActionCard";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
-
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
+import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Building2, 
-  Search, 
-  TrendingDown, 
-  Percent, 
-  IndianRupee, 
-  Filter,
-  ArrowRight
-} from "lucide-react"; 
-import { Link } from "react-router-dom"; 
 
-/* ---------------- MOCK BANK DATA (TEMP) ---------------- */
-
-const accounts = [
-  {
-    id: "acc-1",
-    type: "Savings Account",
-    balance: 84250,
-    currency: "INR",
-  },
-];
-
-const transactions = [
-  { id: 1, status: "pending", amount: 2500 },
-  { id: 2, status: "completed", amount: 12000 },
-];
-
-const interestRates = [
-  { id: 1, name: "Savings Interest", rate: "4.0%" },
-  { id: 2, name: "FD (1 Year)", rate: "6.75%" },
-  { id: 3, name: "Personal Loan", rate: "10.5%" },
-];
-
-const allLoans = [ 
-  { id: 1, bank: "State Bank of India", type: "Personal Loan", rate: "10.5%", max: "₹25,00,000", tenure: "60 months", trend: "down", featured: true },
-  { id: 2, bank: "HDFC Bank", type: "Business Loan", rate: "11.25%", max: "₹50,00,000", tenure: "48 months", trend: "up", featured: false },
-  { id: 3, bank: "ICICI Bank", type: "Micro Loan", rate: "12.0%", max: "₹5,00,000", tenure: "36 months", trend: "down", featured: true },
-];
-
-  // const [searchTerm, setSearchTerm] = useState("");
-  // const [filter, setFilter] = useState<"all" | "personal" | "business" | "home">("all");
-
-  // const filteredLoans = allLoans.filter((loan) => {
-  //   const matchesSearch = loan.bank.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //                        loan.type.toLowerCase().includes(searchTerm.toLowerCase());
-  //   const matchesFilter = filter === "all" || loan.type.toLowerCase().includes(filter);
-  //   return matchesSearch && matchesFilter;
-  // });
-
-
-/* ------------------------------------------------------ */
-
-export default function CustomerDashboard() {
-  const { user } = useAuth();
+export function FarmerOrders() {
   const navigate = useNavigate();
 
-  // ✅ DEFAULT USER FOR TESTING
-  const resolvedUser = user ?? {
-    id: "user-1",
-    name: "Test Customer",
-    role: "customer",
-    city: "Mumbai",
-  };
-
-  const primaryAccount = accounts[0];
-
-  const pendingTransactions = transactions.filter(
-    t => t.status === "pending"
-  ).length;
-
-    // ---------------- LOAN SEARCH STATE ----------------
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<
-    "all" | "personal" | "business" | "home"
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "pending" | "processing" | "in-transit" | "completed"
   >("all");
 
-  const filteredLoans = allLoans.filter((loan) => {
-    const matchesSearch =
-      loan.bank.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loan.type.toLowerCase().includes(searchTerm.toLowerCase());
+  const orders = [
+    {
+      id: "ORD-9021",
+      buyer: "FreshMart Exports",
+      product: "Basmati Rice",
+      quantity: 500,
+      unit: "kg",
+      amount: 34500,
+      status: "in-transit",
+      date: "2024-01-15",
+    },
+    {
+      id: "ORD-9020",
+      buyer: "Local Wholesaler",
+      product: "Tomatoes",
+      quantity: 600,
+      unit: "kg",
+      amount: 14400,
+      status: "processing",
+      date: "2024-01-14",
+    },
+    {
+      id: "ORD-9019",
+      buyer: "AgriLogistics",
+      product: "Wheat",
+      quantity: 800,
+      unit: "quintal",
+      amount: 17200,
+      status: "completed",
+      date: "2024-01-13",
+    },
+  ];
 
-    const matchesFilter =
-      filter === "all" || loan.type.toLowerCase().includes(filter);
-
-    return matchesSearch && matchesFilter;
-  });
-
-    const { loginDemo } = useAuth();
-
-    const handleLogin = () => {
-    loginDemo("farmer@test.com", "farmer");
-    console.log("LOGIN CALLED");
-    };
-
+  const filteredOrders =
+    filterStatus === "all"
+      ? orders
+      : orders.filter((o) => o.status === filterStatus);
 
   return (
-    <ResponsiveLayout title="Products">
+    <ResponsiveLayout title="Orders">
       <div className="space-y-6">
- 
+
+        {/* Filters */}
+        <div className="flex gap-2 flex-wrap">
+          {(["all", "pending", "processing", "in-transit", "completed"] as const).map(
+            (status) => (
+              <Badge
+                key={status}
+                variant={filterStatus === status ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => setFilterStatus(status)}
+              >
+                {status.replace("-", " ").toUpperCase()}
+              </Badge>
+            )
+          )}
+        </div>
+
+        {/* Orders List */}
+        <div className="space-y-4">
+          {filteredOrders.map((order) => (
+            <Card key={order.id} className="card-hover">
+              <CardContent className="p-6">
+
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold">{order.id}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {order.date}
+                    </p>
+                  </div>
+
+                  <Badge
+                    className={
+                      order.status === "completed"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : order.status === "in-transit"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-amber-100 text-amber-700"
+                    }
+                  >
+                    {order.status.replace("-", " ")}
+                  </Badge>
+                </div>
+
+                {/* Details */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 border-y border-border mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Buyer</p>
+                    <p className="font-semibold">{order.buyer}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">Product</p>
+                    <p className="font-semibold">{order.product}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">Quantity</p>
+                    <p className="font-semibold">
+                      {order.quantity} {order.unit}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between">
+                  <p className="text-2xl font-bold text-emerald-600">
+                    ₹{order.amount.toLocaleString()}
+                  </p>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate(`/farmer/orders/${order.id}`)
+                    }
+                  >
+                    View Details
+                  </Button>
+                </div>
+
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </ResponsiveLayout>
   );

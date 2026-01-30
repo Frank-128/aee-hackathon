@@ -17,7 +17,10 @@ export interface User {
   phone?: string;
   role: UserRole;
   avatar?: string;
+  city?: string;
+  state?: string;
 }
+
 
 interface AuthResult {
   success: boolean;
@@ -45,20 +48,27 @@ const mockUsers: Record<UserRole, User> = {
     name: "Ramesh Kumar",
     email: "farmer@test.com",
     role: "farmer",
+    city: "Ludhiana",
+    state: "Punjab",
   },
   buyer: {
     id: "buyer-1",
     name: "Anita Verma",
     email: "buyer@test.com",
     role: "buyer",
+    city: "Mumbai",
+    state: "Maharashtra",
   },
   admin: {
     id: "admin-1",
     name: "Admin User",
     email: "admin@test.com",
     role: "admin",
+    city: "Bengaluru",
+    state: "Karnataka",
   },
 };
+
 
 /* -------------------- Provider -------------------- */
 

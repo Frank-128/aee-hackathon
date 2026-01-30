@@ -19,10 +19,12 @@ import {
   FarmerInsights,
   FarmerLearn,
   FarmerInventory,FarmerNotifications,
-  FarmerOrders,
   FarmerWeather,
  } from "./pages/farmer/farmerPages"
  import FarmerMessages from "./pages/farmer/farmerMessages"; 
+ import FarmerOrderDetails from "./pages/farmer/farmerOrderDetail";
+ import {FarmerOrders} from "./pages/farmer/farmerOrders";
+
 
 
 // consumer imports
@@ -69,19 +71,20 @@ const App = () => (
         {/* Farmer Routes */}
         <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
         <Route path="/farmer/products" element={<FarmerProducts />} />
-        <Route path="/farmer/orders" element={<FarmerOrders />} />
+        <Route path="/farmer/orders/:orderId" element={<FarmerOrderDetails />} />
+
         <Route path="/farmer/earnings" element={<FarmerEarnings />} />
         <Route path="/farmer/nearby-farmers" element={<FarmerDashboard />} />
         <Route path="/farmer/inventory" element={<FarmerInventory />} />
         <Route path="/farmer/delivery" element={<FarmerDelivery />} />
+        <Route path="/farmer/orders" element={<FarmerOrders />} />
         <Route path="/farmer/insights" element={<FarmerInsights />} />
         <Route path="/farmer/weather" element={<FarmerWeather />} />
         <Route path="/farmer/learn" element={<FarmerLearn />} />
         <Route path="/farmer/notifications" element={<FarmerNotifications />} />
         <Route path="/farmer/messages" element={<FarmerMessages />} />
         <Route path="/farmer/help" element={<FarmerHelp />} />
-        
-        
+
         {/* Buyer Routes */}
         <Route path="/buyer/dashboard" element={<BuyerDashboard />} />
         <Route path="/buyer/market" element={<BuyerMarket />} />

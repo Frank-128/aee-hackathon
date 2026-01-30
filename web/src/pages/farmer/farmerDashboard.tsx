@@ -61,30 +61,37 @@ const allLoans = [
   { id: 3, bank: "ICICI Bank", type: "Micro Loan", rate: "12.0%", max: "₹5,00,000", tenure: "36 months", trend: "down", featured: true },
 ];
 
-  // const [searchTerm, setSearchTerm] = useState("");
-  // const [filter, setFilter] = useState<"all" | "personal" | "business" | "home">("all");
-
-  // const filteredLoans = allLoans.filter((loan) => {
-  //   const matchesSearch = loan.bank.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //                        loan.type.toLowerCase().includes(searchTerm.toLowerCase());
-  //   const matchesFilter = filter === "all" || loan.type.toLowerCase().includes(filter);
-  //   return matchesSearch && matchesFilter;
-  // });
-
-
-/* ------------------------------------------------------ */
-
 export default function CustomerDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  if (isLoading) {
+    return (
+      <ResponsiveLayout title="Dashboard">
+        <div className="flex items-center justify-center h-[60vh]">
+          <p className="text-muted-foreground">Loading dashboard…</p>
+        </div>
+      </ResponsiveLayout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <ResponsiveLayout title="Dashboard">
+        <div className="flex items-center justify-center h-[60vh] flex-col gap-3">
+          <p className="text-muted-foreground">You are not logged in</p>
+          <Button onClick={() => navigate("/login")}>
+            Go to Login
+          </Button>
+        </div>
+      </ResponsiveLayout>
+    );
+  }
+
+
   // ✅ DEFAULT USER FOR TESTING
-  const resolvedUser = user ?? {
-    id: "user-1",
-    name: "Test Customer",
-    role: "customer",
-    city: "Mumbai",
-  };
+  const resolvedUser = user;
+
 
   const primaryAccount = accounts[0];
 
@@ -109,19 +116,163 @@ export default function CustomerDashboard() {
     return matchesSearch && matchesFilter;
   });
 
-    const { loginDemo } = useAuth();
+  const { loginDemo } = useAuth();
 
-    const handleLogin = () => {
-    loginDemo("farmer@test.com", "farmer");
-    console.log("LOGIN CALLED");
-    };
+  const handleLogin = () => {
+  loginDemo("farmer@test.com", "farmer");
+  console.log("LOGIN CALLED");
+  };
+
+
 
 
   return (
-    <ResponsiveLayout title="Dashboard">
-      <div className="space-y-6">
- 
+  <ResponsiveLayout title="Dashboard">
+      <div className="space-y-8">
+
+      {/* ================= GREETING ================= */}
+      <div className="flex items-center justify-between">
+          <div>
+          <p className="text-sm text-emerald-600 flex items-center gap-1">
+              ☀️ Good Morning
+          </p>
+          <h1 className="text-2xl font-bold">
+              Namaste, {resolvedUser.name}
+          </h1>
+          </div>
+
+          <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" className="flex items-center gap-1">
+            <MapPin className="w-4 h-4" />
+            {resolvedUser?.city ?? "Unknown"}
+          </Button>
+          </div>
       </div>
-    </ResponsiveLayout>
+
+      {/* ================= WEATHER / HIGHLIGHT ================= */}
+      <Card className="bg-gradient-to-br from-emerald-600 to-lime-500 text-white">
+          <CardContent className="p-6 flex items-center justify-between">
+          <div>
+              <p className="text-sm opacity-90">Weather Today</p>
+              <h3 className="text-3xl font-bold">
+              28°C <span className="text-lg font-normal">Sunny</span>
+              </h3>
+              <Badge className="mt-2 bg-white/20 text-white">
+              Best for Wheat Harvest
+              </Badge>
+          </div>
+          <span className="text-6xl">🌤️</span>
+          </CardContent>
+      </Card>
+
+      {/* ================= AI RATES ================= */}
+      <section>
+          <div className="flex justify-between items-center mb-3">
+          <h2 className="text-xl font-bold">Today’s AI Rates</h2>
+          <Button variant="ghost" size="sm">See All</Button>
+          </div>
+
+          <div className="flex gap-4 overflow-x-auto pb-2">
+          {[
+              { crop: "Wheat", price: "₹2,125/qntl", trend: "+4.2%", up: true },
+              { crop: "Tomato", price: "₹1,850/qntl", trend: "-1.5%", up: false },
+              { crop: "Corn", price: "₹2,400/qntl", trend: "+2.8%", up: true },
+          ].map((item) => (
+              <Card
+              key={item.crop}
+              className="min-w-[150px] shrink-0"
+              >
+              <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">
+                  {item.crop}
+                  </p>
+                  <p className="text-lg font-bold">{item.price}</p>
+                  <p
+                  className={`text-xs font-semibold mt-1 ${
+                      item.up ? "text-emerald-600" : "text-red-500"
+                  }`}
+                  >
+                  {item.trend}
+                  </p>
+              </CardContent>
+              </Card>
+          ))}
+          </div>
+      </section>
+
+      {/* ================= BUYER INTERESTS ================= */}
+      <section>
+          <div className="flex justify-between items-center mb-3">
+          <h2 className="text-xl font-bold">Buyer Interests</h2>
+          <Badge className="bg-emerald-600">3 New</Badge>
+          </div>
+
+          <div className="space-y-4">
+          <Card>
+              <CardContent className="p-4 flex justify-between items-center">
+              <div>
+                  <h4 className="font-bold">FreshMart Exports</h4>
+                  <p className="text-sm text-muted-foreground">
+                  Wants 500kg Wheat @ ₹2,200
+                  </p>
+                  <div className="flex gap-2 mt-2">
+                  <Button size="sm">Accept</Button>
+                  <Button size="sm" variant="outline">Negotiate</Button>
+                  </div>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                  2 min ago
+              </span>
+              </CardContent>
+          </Card>
+
+          <Card>
+              <CardContent className="p-4 flex justify-between items-center">
+              <div>
+                  <h4 className="font-bold">AgriLogistics Co.</h4>
+                  <p className="text-sm text-muted-foreground">
+                  Quote requested for Organic Basmati
+                  </p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+              </CardContent>
+          </Card>
+          </div>
+      </section>
+
+      {/* ================= QUICK ACTIONS ================= */}
+      <section>
+          <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <ActionCard
+              icon={ArrowUpRight}
+              title="Sell Crop"
+              description="List produce"
+              to="/sell"
+          />
+          <ActionCard
+              icon={TrendingUp}
+              title="Soil Analysis"
+              description="AI insights"
+              to="/soil"
+          />
+          <ActionCard
+              icon={Clock}
+              title="Track Truck"
+              description="Live tracking"
+              to="/tracking"
+          />
+          <ActionCard
+              icon={FileText}
+              title="Govt Schemes"
+              description="Apply benefits"
+              to="/schemes"
+          />
+          </div>
+      </section>
+
+      </div>
+  </ResponsiveLayout>
   );
 }

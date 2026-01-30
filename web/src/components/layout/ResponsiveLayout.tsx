@@ -104,7 +104,6 @@ const farmerNavSections: NavSection[] = [
   },
   {
     title: "AI & Insights",
-    collapsible: true,
     items: [
       { icon: Sparkles, label: "Market Insights", path: "/farmer/insights" },
       { icon: CloudSun, label: "Weather Alerts", path: "/farmer/weather" },
@@ -133,7 +132,6 @@ const buyerNavSections: NavSection[] = [
   },
   {
     title: "Community",
-    collapsible: true,
     items: [
       { icon: MessageCircle, label: "Messages", path: "/buyer/messages" },
       { icon: Star, label: "Reviews", path: "/buyer/reviews" },
