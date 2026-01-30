@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema(
             enum: ['FARMER', 'BUYER', 'ADMIN', 'INVESTOR'],
             default: 'FARMER',
         },
+        location: {
+            state: { type: String },
+            district: { type: String },
+            city: { type: String },
+            address: { type: String }
+        },
         refreshToken: {
             type: String,
         },

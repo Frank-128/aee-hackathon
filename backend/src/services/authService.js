@@ -15,6 +15,7 @@ const registerUser = async (userData) => {
         email,
         password,
         role,
+        location: userData.location,
     });
 
     if (user) {
@@ -23,6 +24,7 @@ const registerUser = async (userData) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            location: user.location,
             token: generateToken(user._id),
             refreshToken: generateRefreshToken(user._id),
         };

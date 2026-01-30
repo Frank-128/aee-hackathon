@@ -12,6 +12,12 @@ const registerSchema = z.object({
         email: z.string().email('Invalid email'),
         password: z.string().min(6, 'Password must be at least 6 characters long'),
         role: z.enum(['FARMER', 'BUYER', 'ADMIN', 'INVESTOR']).optional(),
+        location: z.object({
+            state: z.string().optional(),
+            district: z.string().optional(),
+            city: z.string().optional(),
+            address: z.string().optional(),
+        }).optional(),
     }),
 });
 
