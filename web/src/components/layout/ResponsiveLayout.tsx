@@ -1,44 +1,45 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Palette  } from "lucide-react";
-
-
 import {
   Home,
   Package,
-  Clock,
-  Bell,
-  User,
+  MessageCircle,
+  ShoppingCart,
   Wallet,
-  BarChart3,
+  Leaf,
+  Layers,
+  Truck,
+  Sparkles,
+  CloudSun,
+  BookOpen,
+  Bell,
+  HelpCircle,
+  Settings,
   LogOut,
   Menu,
   ChevronLeft,
-  Check,
-  FileText,
-  Users,
-  Settings,
   Search,
-  Plus,
+  X,
+  Heart,
+  Star,
+  Users,
+  ShieldCheck,
+  UserCheck,
+  FileText,
+  ClipboardList,
+  CreditCard,
+  AlertTriangle,
+  MapPin,
+  FileSearch,
+  Megaphone,
+  BarChart3,
+  MessageSquare,
+  Clock,
+  User,
   ChevronDown,
   ChevronUp,
-  X,
-  HelpCircle,
-  Sparkles,
-  BookOpen,
-  Calendar,
-  CheckSquare,
-  Folder,
-  MessageSquare,
-  GraduationCap,
-  ClipboardList,
-  StickyNote,
-  UserCheck,
-  ClipboardCheck,
-  UserCog,
+  Palette,
 } from 'lucide-react';
-
-
 
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,7 +57,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { notifications } from '@/data/mockData';
-import { ThemeToggle } from '../common/ThemeToggle';
 
 interface ResponsiveLayoutProps {
   children: ReactNode;
@@ -71,11 +71,10 @@ interface ResponsiveLayoutProps {
 interface NavItem {
   icon: React.ElementType;
   label: string;
-  path?: string;   // ✅ optional
-  url?: string;    // ✅ optional
+  path?: string;
+  url?: string;
   badge?: number;
 }
-
 
 interface NavSection {
   title?: string;
@@ -83,74 +82,65 @@ interface NavSection {
   collapsible?: boolean;
 }
 
-const studentNavSections: NavSection[] = [
+// Navigation configurations remain the same
+const farmerNavSections: NavSection[] = [
   {
-    title: 'Navigate',
+    title: "Dashboard",
     items: [
-      { icon: Home, label: 'Dashboard', path: '/student/dashboard' },
-      { icon: FileText, label: 'Courses', path: '/student/courses' },
-      { icon: Clock, label: 'Notes', path: '/student/notes' },
-      { icon: Package, label: 'Files', path: '/student/files' },
-      { icon: BarChart3, label: 'Grades', path: '/student/grades' },
-      { icon: Bell, label: 'Notifications', path: '/student/notifications' },
-      { icon: Users, label: 'Friends', path: '/student/friends' },
-      { icon: Check, label: 'Calendar', path: '/student/calender' },
-      { icon: User, label: 'Learn', path: '/student/learn' },
-    ]
-  },
-  {
-    title: 'More',
-    collapsible: true,
-    items: [
-      { icon: FileText, label: 'Language', path: '/language' },
-      { icon: HelpCircle, label: 'Help Center', path: '/helpcenter' },
-      { icon: Sparkles, label: 'Support', path: '/support' },
-    ]
-  },
-  {
-    title: 'Links',
-    collapsible: true,
-    items: [
-      { icon: Package, label: 'Facebook', url: 'https://facebook.com' },
-      { icon: Package, label: 'Twitter', url: 'https://twitter.com' },
-      { icon: Package, label: 'Instagram', url: 'https://instagram.com' },
-      { icon: Package, label: 'LinkedIn', url: 'https://linkedin.com' },
-    ]
-  }
-];
-
-const facultyNavSections: NavSection[] = [
-  {
-    title: 'Navigate',
-    items: [
-      { icon: Home, label: 'Dashboard', path: '/faculty/dashboard' },
-      { icon: BookOpen, label: 'Courses', path: '/faculty/courses' },
-      { icon: Calendar, label: 'Calendar', path: '/faculty/calender' },
-      { icon: FileText, label: 'Classes', path: '/faculty/classes' },
-      { icon: BarChart3, label: 'Analytics', path: '/faculty/analytics' },
-      { icon: Users, label: 'Students', path: '/faculty/students' },
+      { icon: Home, label: "Home", path: "/farmer/dashboard" },
+      { icon: Package, label: "My Products", path: "/farmer/products" },
+      { icon: MessageCircle, label: "Messages", path: "/farmer/messages" },
+      { icon: ShoppingCart, label: "Orders", path: "/farmer/orders" },
+      { icon: Wallet, label: "Earnings", path: "/farmer/earnings" },
     ],
   },
-
   {
-    title: 'Academic Tools',
+    title: "Farm Management",
     items: [
-      { icon: Folder, label: 'Files', path: '/faculty/files' },
-      { icon: MessageSquare, label: 'Feedback', path: '/faculty/feedback' },
-      { icon: Bell, label: 'Notifications', path: '/faculty/notifications' },
+      { icon: Leaf, label: "Nearby Farmers", path: "/farmer/nearby-farmers" },
+      { icon: Layers, label: "Inventory", path: "/farmer/inventory" },
+      { icon: Truck, label: "Delivery", path: "/farmer/delivery" },
     ],
   },
-
   {
-    title: 'Student Data',
+    title: "AI & Insights",
     collapsible: true,
     items: [
-      { icon: CheckSquare, label: 'Student Attendance', path: '/faculty/attendance' },
-      { icon: StickyNote, label: 'Student Notes', path: '/faculty/student-notes' },
+      { icon: Sparkles, label: "Market Insights", path: "/farmer/insights" },
+      { icon: CloudSun, label: "Weather Alerts", path: "/farmer/weather" },
+      { icon: BookOpen, label: "Learn", path: "/farmer/learn" },
     ],
   },
 ];
 
+const buyerNavSections: NavSection[] = [
+  {
+    title: "Navigate",
+    items: [
+      { icon: Home, label: "Dashboard", path: "/buyer/dashboard" },
+      { icon: Search, label: "Explore Market", path: "/buyer/market" },
+      { icon: ShoppingCart, label: "My Orders", path: "/buyer/orders" },
+      { icon: Heart, label: "Wishlist", path: "/buyer/wishlist" },
+    ],
+  },
+  {
+    title: "Purchasing",
+    items: [
+      { icon: Wallet, label: "Payments", path: "/buyer/payments" },
+      { icon: FileText, label: "Invoices", path: "/buyer/invoices" },
+      { icon: Truck, label: "Delivery Tracking", path: "/buyer/tracking" },
+    ],
+  },
+  {
+    title: "Community",
+    collapsible: true,
+    items: [
+      { icon: MessageCircle, label: "Messages", path: "/buyer/messages" },
+      { icon: Star, label: "Reviews", path: "/buyer/reviews" },
+      { icon: Users, label: "Farmers", path: "/buyer/farmers" },
+    ],
+  },
+];
 
 const adminNavSections: NavSection[] = [
   {
@@ -160,49 +150,39 @@ const adminNavSections: NavSection[] = [
       { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
     ],
   },
-
   {
-    title: 'Academic Management',
+    title: 'User Management',
     items: [
-      { icon: BookOpen, label: 'Courses', path: '/admin/courses-data' },
-      { icon: Calendar, label: 'Timetable', path: '/admin/timetable' },
+      { icon: Users, label: 'Farmers', path: '/admin/farmers' },
+      { icon: UserCheck, label: 'Buyers', path: '/admin/buyers' },
+      { icon: ShieldCheck, label: 'Verification', path: '/admin/verifications' },
     ],
   },
-
   {
-    title: 'Student Management',
+    title: 'Marketplace',
     items: [
-      { icon: Users, label: 'Students', path: '/admin/students' },
-      { icon: UserCheck, label: 'Student Details', path: '/admin/student-detail' },
+      { icon: Package, label: 'Products', path: '/admin/products' },
+      { icon: ClipboardList, label: 'Listings', path: '/admin/listings' },
+      { icon: ShoppingCart, label: 'Orders', path: '/admin/orders' },
     ],
   },
-
   {
-    title: 'Faculty Management',
+    title: 'Transactions',
+    collapsible: true,
     items: [
-      { icon: GraduationCap, label: 'Faculty Data', path: '/admin/faculties' },
-      { icon: ClipboardCheck, label: 'Faculty Attendance', path: '/admin/faculty-attendance' },
-      { icon: Folder, label: 'Faculty Files', path: '/admin/faculty-files' },
-      { icon: MessageSquare, label: 'Faculty Feedback', path: '/admin/faculty-feedback' },
-      { icon: UserCog, label: 'Faculty Detail', path: '/admin/faculty-detail' },
-    ],
-  },
-
-  {
-    title: 'Communication',
-    items: [
-      { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
+      { icon: CreditCard, label: 'Payments', path: '/admin/payments' },
+      { icon: FileText, label: 'Invoices', path: '/admin/invoices' },
+      { icon: AlertTriangle, label: 'Disputes', path: '/admin/disputes' },
     ],
   },
 ];
 
-
 const mobileNavItems: NavItem[] = [
-  { icon: Home, label: 'Home', path: '/student/dashboard' },
-  { icon: FileText, label: 'Projects', path: '/student/courses' },
-  { icon: Clock, label: 'Time', path: '/student/attendance' },
-  { icon: BarChart3, label: 'Stats', path: '/student/grades' },
-  { icon: User, label: 'Profile', path: '/student/profile' },
+  { icon: Home, label: 'Home', path: '/dashboard' },
+  { icon: Search, label: 'Search', path: '/search' },
+  { icon: ShoppingCart, label: 'Orders', path: '/orders' },
+  { icon: MessageCircle, label: 'Messages', path: '/messages' },
+  { icon: User, label: 'Profile', path: '/profile' },
 ];
 
 export function ResponsiveLayout({
@@ -220,22 +200,20 @@ export function ResponsiveLayout({
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Navigate']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Navigate', 'Dashboard']));
   const [accountExpanded, setAccountExpanded] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  
 
-
-  const role = user?.role ?? 'faculty';
+  const role = user?.role ?? 'farmer';
 
   const navSections =
-    role === 'faculty'
-      ? facultyNavSections
-      : role === 'admin'
+    role === 'admin'
       ? adminNavSections
-      : studentNavSections;
+      : role === 'buyer'
+      ? buyerNavSections
+      : farmerNavSections;
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path?: string) => path ? location.pathname === path : false;
 
   const handleLogout = () => {
     logout();
@@ -247,22 +225,13 @@ export function ResponsiveLayout({
 
     const handler = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-
-      if (
-        target.closest('[data-search-wrapper]') ||
-        target.closest('[data-header-actions]')
-      ) {
-        return;
-      }
-
+      if (target.closest('[data-search-wrapper]') || target.closest('[data-header-actions]')) return;
       setSearchOpen(false);
     };
 
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [searchOpen]);
-
-
 
   const toggleSection = (title: string) => {
     const newExpanded = new Set(expandedSections);
@@ -276,50 +245,51 @@ export function ResponsiveLayout({
 
   const unreadNotifications = notifications.filter(n => !n.read);
 
-  // Sidebar Content Component
+  // ============ SIDEBAR CONTENT ============
   const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
-    <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
-
-      {/* Logo */}
-      <div className="h-16 px-4 flex items-center">
-        <button className="flex items-center gap-3 w-full" onClick={() => {
-          navigate('/');
-          onNavigate?.();
-        }}>
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0">
-            <Package className="w-5 h-5 text-foreground" />
+    <div className="flex flex-col h-full bg-gradient-to-b from-emerald-50 to-green-50 dark:from-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100">
+      {/* Logo Section */}
+      <div className="h-20 px-4 flex items-center border-b border-emerald-100 dark:border-slate-800">
+        <button
+          className="flex items-center gap-3 w-full group hover:opacity-80 transition-opacity"
+          onClick={() => {
+            navigate('/');
+            onNavigate?.();
+          }}
+        >
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shrink-0 shadow-lg group-hover:shadow-emerald-500/30">
+            <Package className="w-6 h-6 text-white" />
           </div>
           <div className="leading-tight text-left">
-            <h1 className="text-sm font-semibold text-foreground tracking-tight">
-              {role === 'admin' ? 'Constructor X' : 'CONNECT STUDENT'}
+            <h1 className="text-sm font-bold text-emerald-700 dark:text-emerald-400 tracking-tight">
+              {role === 'admin' ? 'AgriAdmin' : 'RIHNO'}
             </h1>
-            <p className="text-[11px] text-foreground/50">
-              {role.charAt(0).toUpperCase() + role.slice(1)} Portal
+            <p className="text-[11px] text-emerald-600/60 dark:text-emerald-500/50 font-medium">
+              {role.charAt(0).toUpperCase() + role.slice(1)}
             </p>
           </div>
         </button>
       </div>
 
-
-      {/* Navigation Sections */}
-      <nav className="flex-1 px-3 space-y-6 overflow-y-auto custom-scrollbar">
-        {navSections.map((section, sectionIdx) => {
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto custom-scrollbar">
+        {navSections.map((section, idx) => {
           const isExpanded = !section.collapsible || expandedSections.has(section.title || '');
           
           return (
-            <div key={sectionIdx}>
+            <div key={idx} className="space-y-1.5">
               {section.title && (
                 <button
                   onClick={() => section.collapsible && toggleSection(section.title!)}
-                  className="flex items-center justify-between w-full px-3 mb-2 group hover:opacity-100 transition-opacity"
+                  className="flex items-center justify-between w-full px-3 py-2 group hover:opacity-75 transition-opacity"
                 >
-                  <span className="text-[11px] font-medium text-foreground/40 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">
                     {section.title}
                   </span>
                   {section.collapsible && (
                     <ChevronUp
                       className={cn(
-                        "w-3.5 h-3.5 text-foreground/40 transition-transform duration-200",
+                        "w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500 transition-transform duration-200",
                         !isExpanded && "rotate-180"
                       )}
                     />
@@ -336,23 +306,23 @@ export function ResponsiveLayout({
                     key={item.path ?? item.url}
                     onClick={() => {
                       if (item.url) {
-                        window.open(item.url, '_blank'); // 🌍 external
+                        window.open(item.url, '_blank');
                       } else if (item.path) {
-                        navigate(item.path);             // 🧭 internal
+                        navigate(item.path);
                       }
                       onNavigate?.();
                     }}
                     className={cn(
-                      "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                      "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 group",
                       isActive(item.path)
-                        ? "bg-white/10 text-foreground"
-                        : "text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:bg-white/5 hover:text-foreground"
+                        ? "bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-md font-medium"
+                        : "text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-white/50 dark:hover:bg-slate-800/50"
                     )}
                   >
                     <item.icon className="w-[18px] h-[18px] shrink-0" />
                     <span className="text-[13px] font-medium">{item.label}</span>
                     {item.badge && (
-                      <span className="ml-auto text-[11px] px-1.5 py-0.5 bg-red-500 text-foreground rounded">
+                      <span className="ml-auto text-[11px] px-2 py-0.5 bg-red-500 text-white rounded-lg font-bold">
                         {item.badge}
                       </span>
                     )}
@@ -364,135 +334,110 @@ export function ResponsiveLayout({
         })}
       </nav>
 
-
-
-      {/* Expandable Account Section */}
-      <div className="border-t border-white/5">
+      {/* Account Section */}
+      <div className="border-t border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-800/50">
         <button
           onClick={() => setAccountExpanded(!accountExpanded)}
-          className="flex items-center gap-3 w-full px-4 py-3 hover:bg-white/5 transition-colors"
+          className="flex items-center gap-3 w-full px-4 py-3 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors"
         >
-          <Avatar className="w-9 h-9 ring-2 ring-white/10">
+          <Avatar className="w-9 h-9 ring-2 ring-emerald-200 dark:ring-emerald-500/30">
             <AvatarImage src={user?.avatar} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-foreground text-sm font-medium">
+            <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-green-600 text-white text-sm font-bold">
               {user?.name?.charAt(0) || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 text-left min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">{user?.name || 'John Smith'}</p>
-            <p className="text-xs text-foreground/50 truncate">{user?.email || 'johnsmith@gmail.com'}</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{user?.name || 'User'}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user?.email || 'user@email.com'}</p>
           </div>
           <ChevronDown
             className={cn(
-              "w-4 h-4 text-foreground/40 shrink-0 transition-transform duration-200",
+              "w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 transition-transform duration-200",
               accountExpanded && "rotate-180"
             )}
           />
         </button>
 
-        {/* Expanded Account Menu */}
         <div
           className={cn(
-            "overflow-hidden transition-all duration-300 ease-in-out",
+            "overflow-hidden transition-all duration-300 ease-in-out border-t border-emerald-100 dark:border-slate-800",
             accountExpanded ? "max-h-80" : "max-h-0"
           )}
         >
-          <div className="px-3 py-2 space-y-1">
-
-            {/* View Profile */}
+          <div className="px-3 py-2 space-y-1 bg-emerald-50/50 dark:bg-slate-900/50">
             <button
               onClick={() => {
                 navigate(`/${role}/profile`);
                 onNavigate?.();
               }}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:bg-white/5 hover:text-foreground transition-all"
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-white dark:hover:bg-slate-800 transition-all"
             >
               <User className="w-4 h-4" />
-              <span className="text-sm">View Profile</span>
+              <span className="text-sm font-medium">View Profile</span>
             </button>
 
-            {/* Theme Toggle as Button (Mobile) */}
-            <div className="lg:hidden">
-              <div
-                className="flex items-center justify-between w-full px-3 py-0.8 rounded-lg
-                          text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:bg-white/5 hover:text-foreground transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <Palette className="w-4 h-4 text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent group-hover:text-foreground transition-colors" />
-                  <span className="text-sm">Theme</span>
-                </div>
-                <ThemeToggle />
-              </div>
+            <div className="lg:hidden flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400">
+              <Palette className="w-4 h-4" />
+              <span className="text-sm font-medium">Theme</span>
             </div>
 
-            {/* Settings */}
             <button
               onClick={() => {
                 navigate(`/settings`);
                 onNavigate?.();
               }}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:bg-white/5 hover:text-foreground transition-all"
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-white dark:hover:bg-slate-800 transition-all"
             >
               <Settings className="w-4 h-4" />
-              <span className="text-sm">Settings</span>
+              <span className="text-sm font-medium">Settings</span>
             </button>
 
-            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg
-                        text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
             >
               <LogOut className="w-4 h-4" />
-              <span className="text-sm">Logout</span>
+              <span className="text-sm font-medium">Logout</span>
             </button>
-
           </div>
         </div>
       </div>
     </div>
   );
 
-  // Notification Dropdown Component
+  // ============ NOTIFICATION DROPDOWN ============
   const NotificationDropdown = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground hover:bg-muted"
+          className="relative h-10 w-10 rounded-xl text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-slate-800 transition-colors"
         >
-          <Bell className="w-4 h-4" />
+          <Bell className="w-5 h-5" />
           {unreadNotifications.length > 0 && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
           )}
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent
-        align="end"
-        className="w-80 bg-[#1a1a1a] border-white/10 p-0"
-      >
-        <DropdownMenuLabel className="px-3 py-2 text-foreground">
+      <DropdownMenuContent align="end" className="w-80 rounded-2xl">
+        <DropdownMenuLabel className="px-4 py-3 text-emerald-700 dark:text-emerald-400 font-bold">
           Notifications
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
 
-        <DropdownMenuSeparator className="bg-white/10" />
-
-        {/* Notifications list */}
-        <div className="max-h-80 overflow-y-auto custom-scrollbar">
+        <div className="max-h-96 overflow-y-auto custom-scrollbar">
           {notifications.slice(0, 5).map((notif) => (
             <DropdownMenuItem
               key={notif.id}
-              className="flex items-start gap-3 px-3 py-3 text-foreground/80
-                        hover:text-foreground focus:text-foreground
-                        hover:bg-white/5 focus:bg-white/5"
+              className="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-emerald-50 dark:hover:bg-slate-800"
             >
-              <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {notif.title}
                 </p>
-                <p className="text-xs text-foreground/50 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
                   {notif.message}
                 </p>
               </div>
@@ -500,17 +445,9 @@ export function ResponsiveLayout({
           ))}
         </div>
 
-        <DropdownMenuSeparator className="bg-white/10" />
-
-        {/* View all */}
+        <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="
-            justify-center py-2 text-sm cursor-pointer
-            text-primary
-            hover:bg-white/5 focus:bg-white/5
-            hover:text-primary focus:text-primary
-          "
-
+          className="justify-center py-3 text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 cursor-pointer"
           onClick={() => navigate(`/${role}/notifications`)}
         >
           View all notifications
@@ -519,64 +456,64 @@ export function ResponsiveLayout({
     </DropdownMenu>
   );
 
-
-  // Mobile Layout
+  // ============ MOBILE LAYOUT ============
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white dark:from-slate-950 dark:to-slate-900 text-slate-900 dark:text-slate-100 flex flex-col">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-40 bg-[#0f0f0f] border-b border-white/5">
-          <div className="flex items-center justify-between h-14 px-4">
+        <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-emerald-100 dark:border-slate-800">
+          <div className="flex items-center justify-between h-16 px-4 gap-3">
             <div className="flex items-center gap-3">
               {showBack ? (
-                <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground">
-                  <ChevronLeft className="w-5 h-5" />
+                <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400">
+                  <ChevronLeft className="w-6 h-6" />
                 </button>
               ) : (
-                <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground">
-                  <Menu className="w-5 h-5" />
+                <button onClick={() => setSidebarOpen(true)} className="p-1.5 -ml-1.5 text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400">
+                  <Menu className="w-6 h-6" />
                 </button>
               )}
-              <h1 className="text-base font-semibold text-foreground">{title}</h1>
+              <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">{title}</h1>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {headerRight}
-              <ThemeToggle />
               <NotificationDropdown />
             </div>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto pb-20 p-4">
+        {/* Mobile Content */}
+        <main className="flex-1 overflow-y-auto pb-24 px-4 py-4">
           {children}
         </main>
 
         {/* Mobile Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#1a1a1a] border-t border-white/5 safe-bottom">
-          <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-emerald-100 dark:border-slate-800">
+          <div className="flex items-center justify-around h-20 max-w-lg mx-auto px-2">
             {mobileNavItems.map((item) => {
               const active = isActive(item.path);
               return (
                 <button
                   key={item.path}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => navigate(item.path || '/')}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-0 flex-1",
-                    active ? "text-foreground" : "text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                    "flex flex-col items-center justify-center gap-1.5 px-3 py-2 rounded-xl transition-all min-w-0 flex-1",
+                    active 
+                      ? "text-emerald-600 dark:text-emerald-400 font-semibold" 
+                      : "text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400"
                   )}
                 >
-                  <item.icon className="w-5 h-5 shrink-0" />
-                  <span className="text-[10px] font-medium truncate w-full text-center">{item.label}</span>
+                  <item.icon className="w-6 h-6 shrink-0" />
+                  <span className="text-[10px] font-semibold truncate">{item.label}</span>
                 </button>
               );
             })}
           </div>
         </nav>
 
-        {/* Mobile Sidebar Sheet */}
+        {/* Mobile Sidebar */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent side="left" className="w-72 p-0 bg-[#1a1a1a] border-white/10">
+          <SheetContent side="left" className="w-72 p-0 bg-transparent border-r border-emerald-100 dark:border-slate-800">
             <SidebarContent onNavigate={() => setSidebarOpen(false)} />
           </SheetContent>
         </Sheet>
@@ -584,33 +521,32 @@ export function ResponsiveLayout({
     );
   }
 
-// Desktop Layout
+  // ============ DESKTOP/TABLET LAYOUT ============
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 flex">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-72 h-screen bg-sidebar text-sidebar-foreground border-r border-white/10">
+      <aside className="hidden lg:flex flex-col w-72 h-screen bg-gradient-to-b from-emerald-50 to-green-50 dark:from-slate-900 dark:to-slate-950 border-r border-emerald-100 dark:border-slate-800 sticky top-0 overflow-hidden">
         <SidebarContent />
       </aside>
 
       {/* Tablet Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-72 p-0 bg-[#1a1a1a] border-white/10 lg:hidden">
+        <SheetContent side="left" className="w-72 p-0 bg-transparent border-r border-emerald-100 dark:border-slate-800 lg:hidden">
           <SidebarContent onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Desktop/Tablet Header */}
-        <header className="sticky top-0 z-30 bg-background border-b border-border">
-          {/* UPDATED: Changed px-6 to px-4 to remove the gap and align with sidebar */}
-          <div className="flex items-center h-16 px-4 gap-4">
-            {/* LEFT */}
+        {/* Header */}
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-emerald-100 dark:border-slate-800">
+          <div className="flex items-center h-16 px-4 lg:px-6 gap-4">
+            {/* Left Section */}
             <div className="flex items-center gap-4 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden h-9 w-9 text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground hover:bg-muted"
+                className="lg:hidden h-10 w-10 rounded-xl text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-slate-800"
                 onClick={() => setSidebarOpen(true)}
               >
                 <Menu className="w-5 h-5" />
@@ -619,23 +555,23 @@ export function ResponsiveLayout({
               {showBack && (
                 <button
                   onClick={() => navigate(-1)}
-                  className="p-2 -ml-2 text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
+                  className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-6 h-6" />
                 </button>
               )}
 
               {title && (
-                <h1 className="text-lg font-semibold text-foreground whitespace-nowrap">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
                   {title}
                 </h1>
               )}
             </div>
 
-            {/* ✅ FLEX SPACER */}
+            {/* Spacer */}
             <div className="flex-1" />
 
-            {/* RIGHT */}
+            {/* Right Section */}
             <div className="flex items-center gap-2 flex-shrink-0">
               {/* Search */}
               <div data-search-wrapper className="relative flex items-center">
@@ -643,7 +579,7 @@ export function ResponsiveLayout({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-muted-foreground/80     hover:text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground hover:bg-muted"
+                    className="h-10 w-10 rounded-xl text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-slate-800"
                     onClick={() => setSearchOpen(true)}
                   >
                     <Search className="w-5 h-5" />
@@ -653,56 +589,55 @@ export function ResponsiveLayout({
                 <div
                   className={cn(
                     "overflow-hidden transition-all duration-300 ease-out",
-                    searchOpen ? "w-[240px] opacity-100" : "w-0 opacity-0"
+                    searchOpen ? "w-[260px] opacity-100" : "w-0 opacity-0"
                   )}
                 >
                   <div className="relative ml-2">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                       autoFocus
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={(e) => e.key === 'Escape' && setSearchOpen(false)}
                       placeholder="Search..."
-                      className="h-10 w-full pl-10 pr-10 bg-white/5 border border-white/10 rounded-lg text-sm text-foreground placeholder:text-foreground/40 focus:outline-none"
+                      className="h-10 w-full pl-10 pr-10 bg-emerald-50 dark:bg-slate-800 border border-emerald-100 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400"
                     />
                     <button
                       onClick={() => setSearchOpen(false)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               </div>
-              
-              <ThemeToggle />
+
               <NotificationDropdown />
 
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-muted-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground hover:bg-muted"
+                className="h-10 w-10 rounded-xl text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-slate-800"
                 onClick={() => navigate(`/support`)}
               >
-                <HelpCircle className="w-4 h-4" />
+                <HelpCircle className="w-5 h-5" />
               </Button>
 
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-muted-foreground/80    hover:text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground hover:bg-muted"
+                className="h-10 w-10 rounded-xl text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-slate-800"
                 onClick={() => navigate(`/settings`)}
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="w-5 h-5" />
               </Button>
 
               <Avatar
-                className="w-9 h-9 ring-2 ring-white/10 cursor-pointer hidden lg:flex"
+                className="w-10 h-10 ring-2 ring-emerald-200 dark:ring-emerald-500/30 cursor-pointer hover:ring-emerald-300 dark:hover:ring-emerald-400/50 transition-all hidden lg:flex"
                 onClick={() => navigate(`/${role}/profile`)}
               >
                 <AvatarImage src={user?.avatar} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-foreground">
+                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-green-600 text-white font-bold">
                   {user?.name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -712,8 +647,7 @@ export function ResponsiveLayout({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
-          {/* UPDATED: Changed p-6 to p-4 to match the header alignment */}
-          <div className="p-4 w-full">
+          <div className="p-6 w-full max-w-7xl mx-auto">
             {children}
           </div>
         </main>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Card,
   CardContent,
@@ -61,7 +62,7 @@ const authenticateUser = (
 
 const Login = () => {
   const navigate = useNavigate();
-
+  const { loginDemo } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -71,15 +72,6 @@ const Login = () => {
       toast({
         title: "Missing fields",
         description: "Please enter email and password",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!emailRegex.test(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
         variant: "destructive",
       });
       return;
@@ -96,26 +88,16 @@ const Login = () => {
       return;
     }
 
-    // Successful login
+    // ✅ SET AUTH CONTEXT (THIS WAS MISSING)
+    loginDemo(user.email, user.role);
+
     toast({
       title: "Login successful",
       description: `Welcome back, ${user.role}!`,
     });
 
-    // Role-based redirect
-    switch (user.role) {
-      case "farmer":
-        navigate("/farmer/dashboard");
-        break;
-      case "buyer":
-        navigate("/buyer/dashboard");
-        break;
-      case "admin":
-        navigate("/admin/dashboard");
-        break;
-      default:
-        navigate("/");
-    }
+    // ✅ Redirect
+    navigate(`/${user.role}/dashboard`);
   };
 
   return (
