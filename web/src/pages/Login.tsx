@@ -17,7 +17,7 @@ import { Eye, EyeOff } from "lucide-react";
 type UserRecord = {
   email: string;
   password: string;
-  role: "farmer" | "consumer" | "admin";
+  role: "farmer" | "buyer" | "admin";
 };
 
 const dummyUsers: UserRecord[] = [
@@ -29,7 +29,7 @@ const dummyUsers: UserRecord[] = [
   {
     email: "buyer@test.com",
     password: "Buyer@123",
-    role: "consumer",
+    role: "buyer",
   },
   {
     email: "admin@test.com",
@@ -107,7 +107,7 @@ const Login = () => {
       case "farmer":
         navigate("/farmer/dashboard");
         break;
-      case "consumer":
+      case "buyer":
         navigate("/buyer/dashboard");
         break;
       case "admin":

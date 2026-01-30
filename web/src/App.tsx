@@ -8,6 +8,16 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+// farmer imports
+import FarmerDashboard from "./pages/farmer/farmerDashboard"
+
+// consumer imports
+import ConsumerDashboard from "./pages/buyers/consumerDashboard"
+
+// farmer imports
+import AdminDashboard from "./pages/admin/adminDashboard"
+
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -20,6 +30,16 @@ const App = () => (
           <Route path="/" element={<LandingPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+
+          {/* Farmer Routes */}
+          <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
+
+
+          {/* Consumer Routes */}
+          <Route path="/buyers/dashboard" element={<ConsumerDashboard />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

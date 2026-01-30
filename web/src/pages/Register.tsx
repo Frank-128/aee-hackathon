@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,39 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { User, Users, Eye, EyeOff } from "lucide-react";
 
-type Role = "farmer" | "consumer";
+/* ------------------ Types ------------------ */
+
+type Role = "farmer" | "buyer";
 type Step = "role" | "details";
+
+type StateDistrictMap = {
+  [state: string]: string[];
+};
+
+/* ------------------ Validation ------------------ */
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const strongPasswordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+/* ------------------ Dummy API ------------------ */
+
+const fetchStatesAndDistricts = async (): Promise<StateDistrictMap> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        Karnataka: ["Bengaluru Urban", "Mysuru", "Mangaluru"],
+        Maharashtra: ["Mumbai", "Pune", "Nagpur"],
+        TamilNadu: ["Chennai", "Coimbatore", "Madurai"],
+        Kerala: ["Thiruvananthapuram", "Kochi", "Kozhikode"],
+        Telangana: ["Hyderabad", "Warangal"],
+        Gujarat: ["Ahmedabad", "Surat"],
+      });
+    }, 500);
+  });
+};
+
+/* ------------------ Component ------------------ */
 
 const Register = () => {
   const navigate = useNavigate();
@@ -30,14 +57,38 @@ const Register = () => {
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
   const [email, setEmail] = useState("");
+
+  const [address, setAddress] = useState("");
+
+  const [stateQuery, setStateQuery] = useState("");
+  const [districtQuery, setDistrictQuery] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleRoleSelect = (selectedRole: Role) => {
-    setRole(selectedRole);
+  const [statesData, setStatesData] = useState<StateDistrictMap>({});
+
+  useEffect(() => {
+    fetchStatesAndDistricts().then(setStatesData);
+  }, []);
+
+  const filteredStates = Object.keys(statesData).filter((s) =>
+    s.toLowerCase().includes(stateQuery.toLowerCase())
+  );
+
+  const filteredDistricts =
+    selectedState && statesData[selectedState]
+      ? statesData[selectedState].filter((d) =>
+          d.toLowerCase().includes(districtQuery.toLowerCase())
+        )
+      : [];
+
+  const handleRoleSelect = (r: Role) => {
+    setRole(r);
     setStep("details");
   };
 
@@ -48,6 +99,9 @@ const Register = () => {
       !phone ||
       !dob ||
       !email ||
+      !address ||
+      !selectedState ||
+      !selectedDistrict ||
       !password ||
       !confirmPassword
     ) {
@@ -72,7 +126,7 @@ const Register = () => {
       toast({
         title: "Weak password",
         description:
-          "Password must be at least 8 characters and include uppercase, lowercase, and a number",
+          "Password must contain uppercase, lowercase & number (min 8 chars)",
         variant: "destructive",
       });
       return;
@@ -95,10 +149,13 @@ const Register = () => {
     navigate("/login");
   };
 
+  const inputClass =
+    "h-11 rounded-lg bg-slate-50 border border-border px-4 text-sm focus:bg-white focus:outline-none focus:ring-0";
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md">
-        <Card className="bg-card/90 backdrop-blur border border-border shadow-sm hover:shadow-md transition-shadow">
+        <Card className="bg-white border border-border/60 rounded-xl shadow-md">
           <CardHeader className="text-center">
             <CardTitle>Create Account</CardTitle>
             <CardDescription>
@@ -107,7 +164,6 @@ const Register = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* STEP 1 – ROLE */}
             {step === "role" && (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground text-center">
@@ -115,16 +171,8 @@ const Register = () => {
                 </p>
 
                 <Button
-                  className="
-                    w-full justify-start gap-3
-                    border border-border
-                    bg-background text-foreground
-                    transition-all duration-200
-                    hover:border-primary
-                    hover:bg-primary/5
-                    hover:-translate-y-[1px]
-                    hover:shadow-sm
-                  "
+                  variant="outline"
+                  className="w-full h-11 rounded-full bg-slate-50 border border-border justify-start gap-3 hover:bg-slate-100"
                   onClick={() => handleRoleSelect("farmer")}
                 >
                   <User className="w-4 h-4" />
@@ -132,17 +180,9 @@ const Register = () => {
                 </Button>
 
                 <Button
-                  className="
-                    w-full justify-start gap-3
-                    border border-border
-                    bg-background text-foreground
-                    transition-all duration-200
-                    hover:border-primary
-                    hover:bg-primary/5
-                    hover:-translate-y-[1px]
-                    hover:shadow-sm
-                  "
-                  onClick={() => handleRoleSelect("consumer")}
+                  variant="outline"
+                  className="w-full h-11 rounded-full bg-slate-50 border border-border justify-start gap-3 hover:bg-slate-100"
+                  onClick={() => handleRoleSelect("buyer")}
                 >
                   <Users className="w-4 h-4" />
                   Consumer / Buyer
@@ -150,99 +190,97 @@ const Register = () => {
               </div>
             )}
 
-            {/* STEP 2 – DETAILS */}
             {step === "details" && (
               <>
                 <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    placeholder="First Name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="bg-background border-border focus-visible:ring-primary"
-                  />
-                  <Input
-                    placeholder="Last Name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="bg-background border-border focus-visible:ring-primary"
-                  />
+                  <Input className={inputClass} placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                  <Input className={inputClass} placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                </div>
+
+                <Input className={inputClass} placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} />
+                <Input className={inputClass} type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
+                <Input className={inputClass} placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} />
+                
+                {/* STATE */}
+                <div className="relative">
+                  <Input className={inputClass} placeholder="State" value={stateQuery} onChange={(e) => {
+                    setStateQuery(e.target.value);
+                    setSelectedState("");
+                    setSelectedDistrict("");
+                    setDistrictQuery("");
+                  }} />
+                  {stateQuery && !selectedState && (
+                    <div className="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 max-h-40 overflow-auto shadow-sm">
+                      {filteredStates.map((s) => (
+                        <div
+                          key={s}
+                          className="px-4 py-2 hover:bg-slate-100 cursor-pointer text-sm"
+                          onClick={() => {
+                            setSelectedState(s);
+                            setStateQuery(s);
+                          }}
+                        >
+                          {s}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* DISTRICT */}
+                <div className="relative">
+                  <Input className={inputClass} placeholder="District" disabled={!selectedState} value={districtQuery} onChange={(e) => {
+                    setDistrictQuery(e.target.value);
+                    setSelectedDistrict("");
+                  }} />
+                  {districtQuery && !selectedDistrict && (
+                    <div className="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 max-h-40 overflow-auto shadow-sm">
+                      {filteredDistricts.map((d) => (
+                        <div
+                          key={d}
+                          className="px-4 py-2 hover:bg-slate-100 cursor-pointer text-sm"
+                          onClick={() => {
+                            setSelectedDistrict(d);
+                            setDistrictQuery(d);
+                            setAddress("");
+                          }}
+                        >
+                          {d}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <Input
-                  placeholder="Phone Number"
-                  value={phone}
-                  onChange={(e) =>
-                    setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                  className={inputClass}
+                  placeholder={
+                    selectedDistrict
+                      ? "Full Address (House, Street, Area)"
+                      : "Select State & District first"
                   }
-                  className="bg-background border-border focus-visible:ring-primary"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  disabled={!selectedDistrict}
                 />
 
-                <Input
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="bg-background border-border focus-visible:ring-primary"
-                />
 
-                <Input
-                  type="email"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background border-border focus-visible:ring-primary"
-                />
-
-                {/* Password */}
+                {/* PASSWORD */}
                 <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-background border-border focus-visible:ring-primary pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  >
+                  <Input className={inputClass} type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
 
-                {/* Confirm Password */}
                 <div className="relative">
-                  <Input
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="bg-background border-border focus-visible:ring-primary pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
+                  <Input className={inputClass} type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                  <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
 
-                <Button
-                  className="
-                    w-full
-                    transition-all duration-200
-                    hover:shadow-md
-                    hover:-translate-y-[1px]
-                  "
-                  onClick={handleRegister}
-                >
+                <Button className="w-full h-11 rounded-full bg-green-600 hover:bg-green-700 text-white font-medium" onClick={handleRegister}>
                   Create Account
                 </Button>
               </>
