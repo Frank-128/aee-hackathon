@@ -26,7 +26,7 @@ type Delivery = {
 
 /* ============ DELIVERY TRACKING ============ */
 export function BuyerTracking() {
-  const activeDeliveries = [
+  const activeDeliveries: Delivery[] = [
     {
       id: "ORD-5020",
       product: "Organic Tomatoes",
@@ -34,7 +34,7 @@ export function BuyerTracking() {
       status: "in-transit",
       currentLocation: "Panipat",
       destination: "New Delhi",
-      expectedDelivery: "2024-01-17",
+      expectedDelivery: "17 Jan 2024",
       lastUpdate: "2 hours ago",
     },
   ];
@@ -43,65 +43,54 @@ export function BuyerTracking() {
     <ResponsiveLayout title="Delivery Tracking">
       <div className="space-y-6">
         {activeDeliveries.map((delivery) => (
-          <Card key={delivery.id} className="card-hover">
+          <Card key={delivery.id}>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex justify-between items-center">
                 <span>{delivery.id}</span>
-                <Badge className="bg-blue-100 text-blue-700">In Transit</Badge>
+                <Badge
+                  className={
+                    delivery.status === "delivered"
+                      ? "status-success"
+                      : "bg-blue-100 text-blue-700"
+                  }
+                >
+                  {delivery.status === "delivered"
+                    ? "Delivered"
+                    : "In Transit"}
+                </Badge>
               </CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-6">
-              {/* Product Info */}
-              <div className="pb-4 border-b border-border">
-                <p className="text-sm text-muted-foreground mb-1">Product</p>
+              <div className="border-b pb-4">
+                <p className="text-sm text-muted-foreground">Product</p>
                 <p className="font-semibold">{delivery.product}</p>
-                <p className="text-sm text-muted-foreground">From {delivery.farmer}</p>
+                <p className="text-sm text-muted-foreground">
+                  From {delivery.farmer}
+                </p>
               </div>
 
-              {/* Tracking Steps */}
+              {/* Timeline */}
               <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-4 h-4 rounded-full bg-emerald-600"></div>
-                    <div className="w-1 h-12 bg-emerald-200"></div>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">Order Confirmed</p>
-                    <p className="text-xs text-muted-foreground">Jan 14</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-4 h-4 rounded-full bg-emerald-600"></div>
-                    <div className="w-1 h-12 bg-emerald-200"></div>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">Dispatched</p>
-                    <p className="text-xs text-muted-foreground">Jan 15</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-4 h-4 rounded-full bg-emerald-600"></div>
-                    <div className="w-1 h-12 bg-gray-200"></div>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">In Transit - {delivery.currentLocation}</p>
-                    <p className="text-xs text-muted-foreground">{delivery.lastUpdate}</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-4 h-4 rounded-full bg-gray-300"></div>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">Delivery to {delivery.destination}</p>
-                    <p className="text-xs text-muted-foreground">Expected: {delivery.expectedDelivery}</p>
-                  </div>
-                </div>
+                <TrackingStep
+                  title="Order Confirmed"
+                  subtitle="Jan 14"
+                  active
+                />
+                <TrackingStep
+                  title="Dispatched"
+                  subtitle="Jan 15"
+                  active
+                />
+                <TrackingStep
+                  title={`In Transit - ${delivery.currentLocation}`}
+                  subtitle={delivery.lastUpdate}
+                  active
+                />
+                <TrackingStep
+                  title={`Delivery to ${delivery.destination}`}
+                  subtitle={`Expected: ${delivery.expectedDelivery}`}
+                />
               </div>
             </CardContent>
           </Card>
@@ -111,9 +100,43 @@ export function BuyerTracking() {
   );
 }
 
+function TrackingStep({
+  title,
+  subtitle,
+  active = false,
+}: {
+  title: string;
+  subtitle: string;
+  active?: boolean;
+}) {
+  return (
+    <div className="flex gap-4">
+      <div className="flex flex-col items-center">
+        <div
+          className={`w-4 h-4 rounded-full ${
+            active ? "bg-emerald-600" : "bg-gray-300"
+          }`}
+        />
+        <div
+          className={`w-1 h-12 ${
+            active ? "bg-emerald-200" : "bg-gray-200"
+          }`}
+        />
+      </div>
+      <div>
+        <p className="font-semibold text-sm">{title}</p>
+        <p className="text-xs text-muted-foreground">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
+
+
 /* ============ BUYER ORDERS ============ */
 export function BuyerOrders() {
-  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "completed">("all");
+  const [filterStatus, setFilterStatus] =
+    useState<"all" | "pending" | "completed">("all");
 
   const orders = [
     {
@@ -123,7 +146,7 @@ export function BuyerOrders() {
       quantity: "50kg",
       total: 17250,
       status: "delivered",
-      date: "2024-01-15",
+      date: "15 Jan 2024",
     },
     {
       id: "ORD-5020",
@@ -132,7 +155,7 @@ export function BuyerOrders() {
       quantity: "25kg",
       total: 6000,
       status: "in-transit",
-      date: "2024-01-14",
+      date: "14 Jan 2024",
     },
     {
       id: "ORD-5019",
@@ -141,14 +164,19 @@ export function BuyerOrders() {
       quantity: "100 quintals",
       total: 21500,
       status: "processing",
-      date: "2024-01-13",
+      date: "13 Jan 2024",
     },
   ];
+
+  const filteredOrders = orders.filter((o) => {
+    if (filterStatus === "all") return true;
+    if (filterStatus === "completed") return o.status === "delivered";
+    return o.status !== "delivered";
+  });
 
   return (
     <ResponsiveLayout title="My Orders">
       <div className="space-y-6">
-        {/* Filters */}
         <div className="flex gap-2">
           {(["all", "pending", "completed"] as const).map((status) => (
             <Badge
@@ -157,61 +185,63 @@ export function BuyerOrders() {
               className="cursor-pointer"
               onClick={() => setFilterStatus(status)}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {status.toUpperCase()}
             </Badge>
           ))}
         </div>
 
-        {/* Orders List */}
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <Card key={order.id} className="card-hover">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-bold">{order.id}</h3>
-                    <p className="text-sm text-muted-foreground">{order.date}</p>
-                  </div>
-                  <Badge className={
-                    order.status === "delivered" ? "status-success" :
-                    order.status === "in-transit" ? "bg-blue-100 text-blue-700" :
-                    "bg-amber-100 text-amber-700"
-                  }>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                  </Badge>
+        {filteredOrders.map((order) => (
+          <Card key={order.id}>
+            <CardContent className="p-6 space-y-4">
+              <div className="flex justify-between">
+                <div>
+                  <h3 className="font-bold">{order.id}</h3>
+                  <p className="text-sm text-muted-foreground">{order.date}</p>
                 </div>
+                <Badge>
+                  {order.status.replace("-", " ").toUpperCase()}
+                </Badge>
+              </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4 border-y border-border mb-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Farmer</p>
-                    <p className="font-semibold">{order.farmer}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Product</p>
-                    <p className="font-semibold">{order.product}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Quantity</p>
-                    <p className="font-semibold">{order.quantity}</p>
-                  </div>
-                </div>
+              <div className="grid grid-cols-3 gap-4 border-y py-4">
+                <Info label="Farmer" value={order.farmer} />
+                <Info label="Product" value={order.product} />
+                <Info label="Quantity" value={order.quantity} />
+              </div>
 
-                <div className="flex items-center justify-between">
-                  <p className="text-2xl font-bold text-emerald-600">₹{order.total.toLocaleString()}</p>
-                  <Button variant="outline" size="sm">Track Order</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              <div className="flex justify-between items-center">
+                <p className="text-2xl font-bold text-emerald-600">
+                  ₹{order.total.toLocaleString()}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => (window.location.href = "/buyer/tracking")}
+                >
+                  Track Order
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </ResponsiveLayout>
   );
 }
 
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="font-semibold">{value}</p>
+    </div>
+  );
+}
+
+
 /* ============ WISHLIST ============ */
 export function BuyerWishlist() {
-  const wishlistItems = [
+  const [wishlistItems, setWishlistItems] = useState([
     {
       id: 1,
       name: "Premium Basmati Rice",
@@ -228,47 +258,63 @@ export function BuyerWishlist() {
       unit: "quintal",
       rating: 4.7,
     },
-  ];
+  ]);
+
+  const removeItem = (id: number) => {
+    setWishlistItems((prev) => prev.filter((i) => i.id !== id));
+  };
 
   return (
     <ResponsiveLayout title="Wishlist">
       <div className="space-y-6">
-        {wishlistItems.length > 0 ? (
-          <div className="space-y-4">
-            {wishlistItems.map((item) => (
-              <Card key={item.id} className="card-hover">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-bold">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">{item.farmer}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-semibold">{item.rating}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-emerald-600">₹{item.price.toLocaleString()}</p>
-                      <p className="text-sm text-muted-foreground">/{item.unit}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button className="flex-1">Add to Cart</Button>
-                    <Button variant="outline" size="icon">
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
+        {wishlistItems.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
-              <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-muted-foreground">No items in wishlist</p>
+              <Heart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground">
+                Your wishlist is empty
+              </p>
             </CardContent>
           </Card>
+        ) : (
+          wishlistItems.map((item) => (
+            <Card key={item.id}>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex justify-between">
+                  <div>
+                    <h3 className="font-bold">{item.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {item.farmer}
+                    </p>
+                    <div className="flex items-center gap-1 mt-2">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-semibold">{item.rating}</span>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-emerald-600">
+                      ₹{item.price}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      /{item.unit}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button className="flex-1">Add to Cart</Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => removeItem(item.id)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
         )}
       </div>
     </ResponsiveLayout>

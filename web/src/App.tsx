@@ -24,7 +24,7 @@ import {
   FarmerInventory,FarmerNotifications,
   FarmerWeather,
  } from "./pages/farmer/farmerPages"
- import FarmerMessages from "./pages/farmer/farmerMessages"; 
+ import FarmerMessages from "./pages/common/Messages"; 
  import FarmerOrderDetails from "./pages/farmer/farmerOrderDetail";
  import {FarmerOrders} from "./pages/farmer/farmerOrders";
 
@@ -34,12 +34,14 @@ import {
 import {BuyerDashboard} from "./pages/buyers/buyerDashboard";
 import {BuyerFarmers } from "./pages/buyers/buyerFarmers";
 import BuyerInvoices from "./pages/buyers/buyerInvoice";
-import {  } from "./pages/buyers/buyerOrder";
-import { } from "./pages/buyers/buyerReviews";
+import { BuyerOrders,BuyerTracking,BuyerWishlist } from "./pages/buyers/buyerOrder";
+import { BuyerReviews } from "./pages/buyers/buyerReviews";
 
 import BuyerProfile from "./pages/buyers/buyerProfile";
 import BuyerInvoice from "./pages/buyers/buyerInvoice"
 import BuyerMessages from "./pages/buyers/buyerMessages"
+import {BuyerMarket} from "./pages/buyers/buyerMarket"
+import {MarketProductDetails} from "./pages/buyers/buyerProductDetails"
 
 // admin imports
 import { 
@@ -94,6 +96,8 @@ const App = () => (
         {/* Buyer Routes */}
         <Route path="/buyer/dashboard" element={<BuyerDashboard />} />
         <Route path="/buyer/market" element={<BuyerMarket />} />
+        <Route path="/buyer/product/:id" element={<MarketProductDetails />} />
+
         <Route path="/buyer/orders" element={<BuyerOrders />} />
         <Route path="/buyer/messages" element={<BuyerMessages />} />
         <Route path="/buyer/wishlist" element={<BuyerWishlist />} />
