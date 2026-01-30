@@ -104,11 +104,10 @@ export function BuyerDashboard() {
                   <p className="text-xl font-bold">{item.price}</p>
 
                   <div
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
-                      item.up
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${item.up
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                      }`}
                   >
                     {item.up ? (
                       <TrendingUp className="w-3 h-3" />
