@@ -1,0 +1,172 @@
+# =====================================================
+# GLOBAL / OS
+# =====================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Certificates & secrets
+*.pem
+*.key
+*.crt
+*.cert
+secrets/
+.env
+.env.*
+
+# =====================================================
+# FLUTTER APP (app/)
+# =====================================================
+
+# Dart / Flutter
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.packages
+app/.pub-cache/
+app/.pub/
+app/build/
+app/coverage/
+app/doc/api/
+app/.fvm/
+
+# KEEP pubspec.lock for Flutter APPS
+# (do NOT ignore pubspec.lock)
+
+# IDEs
+app/.idea/
+app/*.iml
+app/.vscode/
+
+# IntelliJ / Android Studio
+**/*.iml
+
+# Android (generated / local)
+
+
+app/android/.gradle/
+app/android/local.properties
+app/android/**/GeneratedPluginRegistrant.java
+app/android/app/build/
+app/android/captures/
+app/android/**/*.jks
+app/android/**/*.keystore
+app/android/gradlew
+app/android/gradlew.bat
+
+# iOS
+app/ios/**/DerivedData/
+app/ios/**/Pods/
+app/ios/**/.symlinks/
+app/ios/**/profile
+app/ios/**/xcuserdata
+app/ios/Flutter/ephemeral
+app/ios/Flutter/Flutter.framework
+app/ios/Flutter/App.framework
+app/ios/Flutter/Generated.xcconfig
+app/ios/Flutter/flutter_export_environment.sh
+app/ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS
+app/macos/Pods/
+app/macos/.symlinks/
+app/macos/Flutter/ephemeral
+app/macos/Flutter/GeneratedPluginRegistrant.swift
+app/macos/xcuserdata/
+
+# Windows (generated)
+app/windows/flutter/generated_plugin_registrant.cc
+app/windows/flutter/generated_plugin_registrant.h
+app/windows/flutter/generated_plugins.cmake
+
+# Linux (generated)
+app/linux/flutter/generated_plugin_registrant.cc
+app/linux/flutter/generated_plugin_registrant.h
+app/linux/flutter/generated_plugins.cmake
+
+# Web (Flutter web build output)
+app/web/build/
+
+# =====================================================
+# REACT APP (web/)
+# =====================================================
+
+# Dependencies
+web/node_modules/
+
+# Build outputs
+web/build/
+web/dist/
+web/out/
+web/.next/
+
+# Environment variables
+web/.env
+web/.env.*
+web/.env.local
+web/.env.development.local
+web/.env.production.local
+web/.env.test.local
+
+# Caches
+web/.eslintcache
+web/.stylelintcache
+web/*.tsbuildinfo
+
+# IDEs
+web/.idea/
+web/.vscode/
+
+# Coverage
+web/coverage/
+
+# =====================================================
+# EXPRESS BACKEND (backend/)
+# =====================================================
+
+# Dependencies
+backend/node_modules/
+
+# Build outputs
+backend/dist/
+backend/build/
+backend/out/
+
+# Logs
+backend/logs/
+backend/*.log
+
+# Environment variables
+backend/.env
+backend/.env.*
+backend/config/local.json
+
+# Database / temp files
+backend/*.sqlite
+backend/*.sqlite3
+backend/*.db
+backend/tmp/
+backend/temp/
+backend/uploads/
+
+# Coverage
+backend/coverage/
+
+# IDEs
+backend/.idea/
+backend/.vscode/
+
+# =====================================================
+# MISC
+# =====================================================
+*.swp
+*.swo
+*.tmp
