@@ -3,26 +3,38 @@ import { useNavigate } from "react-router-dom";
 import {
   BarChart3,
   Users,
-  Package,
-  ShoppingCart,
+  ShoppingBag,
   TrendingUp,
-  AlertCircle,
   CheckCircle,
-  Clock,
   XCircle,
+  Clock,
+  DollarSign,
+  AlertCircle,
+  Package,
+  FileText,
+  Scale,
   Filter,
+  Download,
   Search,
+  Eye,
   Edit,
   Trash2,
-  Eye,
-  Ban,
-  MapPin,
-  FileText,
+  MoreVertical,
+  ArrowUpRight,
+  ArrowDownRight,
+  UserCheck,
+  UserX,
+  Shield,
+  Star,
+  Truck,
   CreditCard,
-  Megaphone,
+  Activity,
+  Calendar,
+  MapPin,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
-import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,139 +42,262 @@ import { Input } from "@/components/ui/input";
 
 /* ============ ADMIN DASHBOARD ============ */
 export function AdminDashboard() {
+  const navigate = useNavigate();
+
   const stats = {
-    totalFarmers: 1250,
-    totalBuyers: 5420,
-    totalOrders: 24830,
-    totalRevenue: 12450000,
-    monthlyGrowth: 23.5,
+    totalFarmers: 2847,
+    totalBuyers: 1923,
+    activeListings: 1456,
+    totalOrders: 8934,
+    revenue: 45670000,
+    pendingVerifications: 34,
+    activeDisputes: 8,
+    successRate: 94.8,
   };
 
-  const statCards = [
+  const quickStats = [
     {
-      label: "Total Farmers",
-      value: stats.totalFarmers,
-      icon: "👨‍🌾",
+      label: "Total Revenue",
+      value: `₹${(stats.revenue / 10000000).toFixed(1)}Cr`,
+      change: "+12.5%",
+      trend: "up",
       color: "bg-emerald-50",
+      icon: DollarSign,
+      iconColor: "text-emerald-600",
     },
     {
-      label: "Total Buyers",
-      value: stats.totalBuyers,
-      icon: "👥",
+      label: "Active Users",
+      value: stats.totalFarmers + stats.totalBuyers,
+      change: "+8.2%",
+      trend: "up",
       color: "bg-blue-50",
+      icon: Users,
+      iconColor: "text-blue-600",
     },
     {
       label: "Total Orders",
-      value: stats.totalOrders,
-      icon: "📦",
-      color: "bg-amber-50",
+      value: stats.totalOrders.toLocaleString(),
+      change: "+15.3%",
+      trend: "up",
+      color: "bg-purple-50",
+      icon: ShoppingBag,
+      iconColor: "text-purple-600",
     },
     {
-      label: "Total Revenue",
-      value: `₹${(stats.totalRevenue / 100000).toFixed(0)}L`,
-      icon: "💰",
-      color: "bg-green-50",
+      label: "Success Rate",
+      value: `${stats.successRate}%`,
+      change: "+2.1%",
+      trend: "up",
+      color: "bg-amber-50",
+      icon: TrendingUp,
+      iconColor: "text-amber-600",
     },
   ];
 
-  const recentActivities = [
-    { id: 1, type: "order", message: "New order ORD-9021 placed", time: "5 mins ago" },
-    { id: 2, type: "user", message: "New farmer registered: Green Valley Farms", time: "15 mins ago" },
-    { id: 3, type: "alert", message: "Payment dispute reported for ORD-9019", time: "1 hour ago" },
-    { id: 4, type: "order", message: "Order ORD-9018 completed and delivered", time: "2 hours ago" },
+  const recentActivity = [
+    {
+      id: 1,
+      type: "order",
+      title: "New bulk order placed",
+      description: "500kg Basmati Rice by Kumar Traders",
+      time: "5 minutes ago",
+      status: "success",
+    },
+    {
+      id: 2,
+      type: "verification",
+      title: "Farmer verification pending",
+      description: "Rajesh Kumar from Punjab",
+      time: "12 minutes ago",
+      status: "pending",
+    },
+    {
+      id: 3,
+      type: "dispute",
+      title: "Dispute raised",
+      description: "Quality issue reported by buyer",
+      time: "1 hour ago",
+      status: "warning",
+    },
+    {
+      id: 4,
+      type: "payment",
+      title: "Payment processed",
+      description: "₹45,000 to Green Valley Farms",
+      time: "2 hours ago",
+      status: "success",
+    },
   ];
 
-  const pendingApprovals = [
-    { id: 1, farmer: "New Harvest Co.", type: "New Farmer Registration", status: "pending" },
-    { id: 2, product: "Organic Basmati", farmer: "Kumar Farm", type: "New Product Listing", status: "pending" },
+  const pendingActions = [
+    {
+      id: 1,
+      title: "Pending Verifications",
+      count: stats.pendingVerifications,
+      action: "Review",
+      route: "/admin/verifications",
+      color: "bg-blue-100 text-blue-700",
+    },
+    {
+      id: 2,
+      title: "Active Disputes",
+      count: stats.activeDisputes,
+      action: "Resolve",
+      route: "/admin/disputes",
+      color: "bg-red-100 text-red-700",
+    },
+    {
+      id: 3,
+      title: "Pending Payments",
+      count: 23,
+      action: "Process",
+      route: "/admin/payments",
+      color: "bg-amber-100 text-amber-700",
+    },
   ];
 
   return (
     <ResponsiveLayout title="Admin Dashboard">
       <div className="space-y-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {statCards.map((stat) => (
-            <Card key={stat.label} className="card-hover">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {quickStats.map((stat) => (
+            <Card key={stat.label} className="card-hover overflow-hidden">
               <CardContent className={`p-6 ${stat.color}`}>
                 <div className="flex items-start justify-between mb-4">
-                  <span className="text-3xl">{stat.icon}</span>
-                  <Badge className="bg-emerald-100 text-emerald-700">
-                    +{stats.monthlyGrowth}%
-                  </Badge>
+                  <div className={`w-12 h-12 rounded-xl bg-white flex items-center justify-center`}>
+                    <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {stat.trend === "up" ? (
+                      <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                    ) : (
+                      <ArrowDownRight className="w-4 h-4 text-red-600" />
+                    )}
+                    <span className="text-sm font-semibold text-emerald-600">
+                      {stat.change}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-3xl font-bold">
-                  {typeof stat.value === "number" ? stat.value.toLocaleString() : stat.value}
-                </p>
+                <p className="text-3xl font-bold">{stat.value}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Recent Activities & Pending Approvals */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Activities */}
-          <Card className="card-hover lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Recent Activities</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-4 p-3 border border-border rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-emerald-600 mt-2 flex-shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold">{activity.message}</p>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
-                    </div>
+        {/* Pending Actions */}
+        <Card className="card-hover">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
+              Pending Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {pendingActions.map((action) => (
+                <div
+                  key={action.id}
+                  className="p-4 border border-border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                  onClick={() => navigate(action.route)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-muted-foreground">{action.title}</p>
+                    <Badge className={action.color}>{action.count}</Badge>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <Button variant="outline" size="sm" className="w-full">
+                    {action.action}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Pending Approvals */}
-          <Card className="card-hover">
-            <CardHeader>
+        {/* Recent Activity */}
+        <Card className="card-hover">
+          <CardHeader>
+            <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-amber-600" />
-                Pending Approvals
+                <Activity className="w-5 h-5 text-emerald-600" />
+                Recent Activity
               </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {pendingApprovals.map((item) => (
-                  <div key={item.id} className="p-3 border border-amber-200 bg-amber-50 rounded-lg">
-                    <p className="text-sm font-semibold">{item.type}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {item.farmer || item.product}
-                    </p>
-                    <Button size="sm" className="w-full mt-2">Review</Button>
-                  </div>
-                ))}
+              <Button variant="ghost" size="sm">
+                View All
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {recentActivity.map((activity) => (
+              <div
+                key={activity.id}
+                className="flex items-start gap-4 p-4 border border-border rounded-lg"
+              >
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    activity.status === "success"
+                      ? "bg-emerald-100"
+                      : activity.status === "warning"
+                      ? "bg-amber-100"
+                      : "bg-blue-100"
+                  }`}
+                >
+                  {activity.status === "success" ? (
+                    <CheckCircle className="w-5 h-5 text-emerald-600" />
+                  ) : activity.status === "warning" ? (
+                    <AlertCircle className="w-5 h-5 text-amber-600" />
+                  ) : (
+                    <Clock className="w-5 h-5 text-blue-600" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">{activity.title}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {activity.description}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {activity.time}
+                  </p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            ))}
+          </CardContent>
+        </Card>
 
-        {/* Quick Actions */}
+        {/* Quick Access */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-2">
+          <Button
+            onClick={() => navigate("/admin/analytics")}
+            variant="outline"
+            className="h-auto py-6 flex flex-col items-center gap-2"
+          >
+            <BarChart3 className="w-6 h-6" />
+            <span className="text-sm">Analytics</span>
+          </Button>
+          <Button
+            onClick={() => navigate("/admin/farmers")}
+            variant="outline"
+            className="h-auto py-6 flex flex-col items-center gap-2"
+          >
             <Users className="w-6 h-6" />
-            <span className="text-sm">Manage Users</span>
+            <span className="text-sm">Farmers</span>
           </Button>
-          <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-2">
-            <Package className="w-6 h-6" />
-            <span className="text-sm">Products</span>
-          </Button>
-          <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-2">
-            <ShoppingCart className="w-6 h-6" />
+          <Button
+            onClick={() => navigate("/admin/orders")}
+            variant="outline"
+            className="h-auto py-6 flex flex-col items-center gap-2"
+          >
+            <ShoppingBag className="w-6 h-6" />
             <span className="text-sm">Orders</span>
           </Button>
-          <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-2">
-            <TrendingUp className="w-6 h-6" />
-            <span className="text-sm">Analytics</span>
+          <Button
+            onClick={() => navigate("/admin/payments")}
+            variant="outline"
+            className="h-auto py-6 flex flex-col items-center gap-2"
+          >
+            <CreditCard className="w-6 h-6" />
+            <span className="text-sm">Payments</span>
           </Button>
         </div>
       </div>
@@ -170,37 +305,201 @@ export function AdminDashboard() {
   );
 }
 
-/* ============ ANALYTICS ============ */
+/* ============ ADMIN ANALYTICS ============ */
 export function AdminAnalytics() {
-  const analyticsMetrics = [
-    { label: "Conversion Rate", value: "3.2%", change: "+0.5%" },
-    { label: "Avg Order Value", value: "₹4,250", change: "+8%" },
-    { label: "Customer Retention", value: "78%", change: "+2%" },
-    { label: "Payment Success Rate", value: "99.2%", change: "+0.1%" },
-  ];
+  const [timeRange, setTimeRange] = useState("7d");
+
+  const analyticsData = {
+    revenue: {
+      total: 45670000,
+      growth: 12.5,
+      chartData: [
+        { day: "Mon", value: 520000 },
+        { day: "Tue", value: 680000 },
+        { day: "Wed", value: 590000 },
+        { day: "Thu", value: 750000 },
+        { day: "Fri", value: 820000 },
+        { day: "Sat", value: 710000 },
+        { day: "Sun", value: 640000 },
+      ],
+    },
+    orders: {
+      total: 8934,
+      completed: 8467,
+      pending: 389,
+      cancelled: 78,
+    },
+    userGrowth: {
+      farmers: { total: 2847, newThisWeek: 45 },
+      buyers: { total: 1923, newThisWeek: 32 },
+    },
+    topProducts: [
+      { name: "Basmati Rice", quantity: "12,500 kg", revenue: 8540000 },
+      { name: "Wheat", quantity: "45,000 kg", revenue: 7890000 },
+      { name: "Tomatoes", quantity: "8,900 kg", revenue: 4560000 },
+      { name: "Onions", quantity: "15,600 kg", revenue: 3890000 },
+    ],
+    regionalData: [
+      { region: "Punjab", orders: 2340, revenue: 12450000 },
+      { region: "Haryana", orders: 1890, revenue: 9870000 },
+      { region: "Uttar Pradesh", orders: 1670, revenue: 8560000 },
+      { region: "Maharashtra", orders: 1450, revenue: 7340000 },
+    ],
+  };
 
   return (
     <ResponsiveLayout title="Analytics">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {analyticsMetrics.map((metric) => (
-            <Card key={metric.label} className="card-hover">
-              <CardContent className="p-6">
-                <p className="text-sm text-muted-foreground mb-2">{metric.label}</p>
-                <p className="text-3xl font-bold mb-2">{metric.value}</p>
-                <p className="text-xs text-emerald-600 font-semibold">{metric.change}</p>
-              </CardContent>
-            </Card>
+      <div className="space-y-8">
+        {/* Time Range Selector */}
+        <div className="flex gap-2">
+          {["24h", "7d", "30d", "90d"].map((range) => (
+            <Badge
+              key={range}
+              variant={timeRange === range ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => setTimeRange(range)}
+            >
+              {range}
+            </Badge>
           ))}
         </div>
 
+        {/* Revenue Chart */}
         <Card className="card-hover">
           <CardHeader>
-            <CardTitle>Platform Growth (Last 6 Months)</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Revenue Overview</CardTitle>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-emerald-600">
+                  ₹{(analyticsData.revenue.total / 10000000).toFixed(1)}Cr
+                </p>
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                  +{analyticsData.revenue.growth}% from last week
+                </p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
-              <p className="text-muted-foreground">Chart visualization would go here</p>
+            <div className="h-64 flex items-end justify-between gap-2">
+              {analyticsData.revenue.chartData.map((data, index) => (
+                <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                  <div className="w-full bg-muted rounded-t-lg relative group cursor-pointer">
+                    <div
+                      className="w-full bg-emerald-500 rounded-t-lg transition-all hover:bg-emerald-600"
+                      style={{
+                        height: `${(data.value / 900000) * 100}%`,
+                        minHeight: "40px",
+                      }}
+                    >
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-2 py-1 rounded text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        ₹{(data.value / 1000).toFixed(0)}K
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground font-medium">
+                    {data.day}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Orders Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">Total Orders</p>
+              <p className="text-3xl font-bold">{analyticsData.orders.total.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Completed</p>
+              <p className="text-3xl font-bold text-emerald-600">
+                {analyticsData.orders.completed.toLocaleString()}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-amber-50">
+              <p className="text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-3xl font-bold text-amber-600">
+                {analyticsData.orders.pending}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-red-50">
+              <p className="text-sm text-muted-foreground mb-1">Cancelled</p>
+              <p className="text-3xl font-bold text-red-600">
+                {analyticsData.orders.cancelled}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Top Products */}
+        <Card className="card-hover">
+          <CardHeader>
+            <CardTitle>Top Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analyticsData.topProducts.map((product, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 border border-border rounded-lg"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-600">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{product.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {product.quantity}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-emerald-600">
+                      ₹{(product.revenue / 100000).toFixed(1)}L
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Regional Performance */}
+        <Card className="card-hover">
+          <CardHeader>
+            <CardTitle>Regional Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analyticsData.regionalData.map((region, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 border border-border rounded-lg"
+                >
+                  <div className="flex items-center gap-4">
+                    <MapPin className="w-5 h-5 text-emerald-600" />
+                    <div>
+                      <p className="font-semibold">{region.region}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {region.orders} orders
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-bold text-emerald-600">
+                    ₹{(region.revenue / 100000).toFixed(1)}L
+                  </p>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -209,46 +508,58 @@ export function AdminAnalytics() {
   );
 }
 
-/* ============ FARMERS MANAGEMENT ============ */
+/* ============ ADMIN FARMERS ============ */
 export function AdminFarmers() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "pending" | "suspended">("all");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   const farmers = [
     {
       id: 1,
-      name: "Kumar Farm Estate",
-      location: "Punjab",
-      status: "active",
-      productsCount: 15,
-      ordersCount: 240,
+      name: "Rajesh Kumar",
+      location: "Karnal, Haryana",
+      phone: "+91 98765 43210",
+      email: "rajesh.kumar@email.com",
+      status: "verified",
       rating: 4.8,
+      totalListings: 12,
+      totalSales: 2340000,
+      joinedDate: "2023-05-12",
+      crops: ["Rice", "Wheat", "Corn"],
     },
     {
       id: 2,
-      name: "Green Valley Farms",
-      location: "Haryana",
-      status: "active",
-      productsCount: 22,
-      ordersCount: 185,
+      name: "Suresh Patel",
+      location: "Panipat, Haryana",
+      phone: "+91 98765 43211",
+      email: "suresh.patel@email.com",
+      status: "verified",
       rating: 4.6,
+      totalListings: 8,
+      totalSales: 1890000,
+      joinedDate: "2023-06-20",
+      crops: ["Tomatoes", "Onions", "Potatoes"],
     },
     {
       id: 3,
-      name: "New Harvest Co.",
-      location: "Punjab",
+      name: "Amit Singh",
+      location: "Ludhiana, Punjab",
+      phone: "+91 98765 43212",
+      email: "amit.singh@email.com",
       status: "pending",
-      productsCount: 5,
-      ordersCount: 12,
-      rating: 4.3,
+      rating: 0,
+      totalListings: 0,
+      totalSales: 0,
+      joinedDate: "2024-01-28",
+      crops: [],
     },
   ];
 
   return (
-    <ResponsiveLayout title="Manage Farmers">
+    <ResponsiveLayout title="Farmers Management">
       <div className="space-y-6">
-        {/* Search & Filter */}
-        <div className="flex gap-4 flex-col md:flex-row">
+        {/* Search and Filters */}
+        <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -258,288 +569,687 @@ export function AdminFarmers() {
               className="pl-10"
             />
           </div>
+          <div className="flex gap-2">
+            {["all", "verified", "pending", "suspended"].map((status) => (
+              <Badge
+                key={status}
+                variant={filterStatus === status ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => setFilterStatus(status)}
+              >
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Badge>
+            ))}
+          </div>
+          <Button variant="outline" className="gap-2">
+            <Download className="w-4 h-4" />
+            Export
+          </Button>
         </div>
 
-        {/* Status Filters */}
-        <div className="flex gap-2">
-          {(["all", "active", "pending", "suspended"] as const).map((status) => (
-            <Badge
-              key={status}
-              variant={filterStatus === status ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setFilterStatus(status)}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Badge>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">Total Farmers</p>
+              <p className="text-3xl font-bold">2,847</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Verified</p>
+              <p className="text-3xl font-bold text-emerald-600">2,689</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-amber-50">
+              <p className="text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-3xl font-bold text-amber-600">124</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-red-50">
+              <p className="text-sm text-muted-foreground mb-1">Suspended</p>
+              <p className="text-3xl font-bold text-red-600">34</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Farmers List */}
+        <div className="space-y-4">
+          {farmers.map((farmer) => (
+            <Card key={farmer.id} className="card-hover">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-600 text-xl">
+                      {farmer.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-lg">{farmer.name}</h3>
+                        {farmer.status === "verified" && (
+                          <UserCheck className="w-5 h-5 text-emerald-600" />
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {farmer.location}
+                      </p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Phone className="w-4 h-4" />
+                          {farmer.phone}
+                        </p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Mail className="w-4 h-4" />
+                          {farmer.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <Badge
+                    className={
+                      farmer.status === "verified"
+                        ? "status-success"
+                        : farmer.status === "pending"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-red-100 text-red-700"
+                    }
+                  >
+                    {farmer.status.charAt(0).toUpperCase() + farmer.status.slice(1)}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y border-border mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Rating</p>
+                    {farmer.rating > 0 ? (
+                      <p className="font-semibold flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        {farmer.rating}
+                      </p>
+                    ) : (
+                      <p className="font-semibold">N/A</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Listings</p>
+                    <p className="font-semibold">{farmer.totalListings}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Sales</p>
+                    <p className="font-semibold text-emerald-600">
+                      ₹{(farmer.totalSales / 100000).toFixed(1)}L
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Joined</p>
+                    <p className="font-semibold">{farmer.joinedDate}</p>
+                  </div>
+                </div>
+
+                {farmer.crops.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-sm text-muted-foreground mb-2">Crops:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {farmer.crops.map((crop) => (
+                        <Badge key={crop} variant="outline">
+                          {crop}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Eye className="w-4 h-4" />
+                    View Details
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </Button>
+                  {farmer.status === "pending" && (
+                    <Button size="sm" className="gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      Verify
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" className="gap-2 text-red-600">
+                    <XCircle className="w-4 h-4" />
+                    Suspend
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
-
-        {/* Farmers Table */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr>
-                    <th className="text-left p-4 font-semibold text-sm">Name</th>
-                    <th className="text-left p-4 font-semibold text-sm">Location</th>
-                    <th className="text-left p-4 font-semibold text-sm">Products</th>
-                    <th className="text-left p-4 font-semibold text-sm">Orders</th>
-                    <th className="text-left p-4 font-semibold text-sm">Rating</th>
-                    <th className="text-left p-4 font-semibold text-sm">Status</th>
-                    <th className="text-left p-4 font-semibold text-sm">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {farmers.map((farmer) => (
-                    <tr key={farmer.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="p-4">{farmer.name}</td>
-                      <td className="p-4 text-muted-foreground">{farmer.location}</td>
-                      <td className="p-4">{farmer.productsCount}</td>
-                      <td className="p-4">{farmer.ordersCount}</td>
-                      <td className="p-4">⭐ {farmer.rating}</td>
-                      <td className="p-4">
-                        <Badge className={
-                          farmer.status === "active" ? "status-success" :
-                          farmer.status === "pending" ? "bg-amber-100 text-amber-700" :
-                          "bg-red-100 text-red-700"
-                        }>
-                          {farmer.status.charAt(0).toUpperCase() + farmer.status.slice(1)}
-                        </Badge>
-                      </td>
-                      <td className="p-4 flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </ResponsiveLayout>
   );
 }
 
-/* ============ BUYERS MANAGEMENT ============ */
+/* ============ ADMIN BUYERS ============ */
 export function AdminBuyers() {
+  const [searchTerm, setSearchTerm] = useState("");
+
   const buyers = [
     {
       id: 1,
-      name: "Rajesh Kumar",
-      email: "rajesh@example.com",
-      joinedDate: "2024-01-10",
-      orders: 12,
-      spent: 145000,
+      name: "Kumar Traders",
+      type: "Business",
+      location: "Delhi",
+      phone: "+91 98765 43220",
+      email: "kumar.traders@email.com",
       status: "active",
+      totalOrders: 145,
+      totalSpent: 5670000,
+      joinedDate: "2023-03-15",
     },
     {
       id: 2,
-      name: "Priya Singh",
-      email: "priya@example.com",
-      joinedDate: "2024-01-05",
-      orders: 8,
-      spent: 95000,
+      name: "Green Valley Stores",
+      type: "Business",
+      location: "Mumbai",
+      phone: "+91 98765 43221",
+      email: "greenvalley@email.com",
       status: "active",
+      totalOrders: 98,
+      totalSpent: 3450000,
+      joinedDate: "2023-07-22",
+    },
+    {
+      id: 3,
+      name: "Raj Sharma",
+      type: "Individual",
+      location: "Bangalore",
+      phone: "+91 98765 43222",
+      email: "raj.sharma@email.com",
+      status: "active",
+      totalOrders: 23,
+      totalSpent: 890000,
+      joinedDate: "2023-11-05",
     },
   ];
 
   return (
-    <ResponsiveLayout title="Manage Buyers">
+    <ResponsiveLayout title="Buyers Management">
       <div className="space-y-6">
+        {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input placeholder="Search buyers..." className="pl-10" />
+          <Input
+            placeholder="Search buyers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
 
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr>
-                    <th className="text-left p-4 font-semibold text-sm">Name</th>
-                    <th className="text-left p-4 font-semibold text-sm">Email</th>
-                    <th className="text-left p-4 font-semibold text-sm">Orders</th>
-                    <th className="text-left p-4 font-semibold text-sm">Total Spent</th>
-                    <th className="text-left p-4 font-semibold text-sm">Joined</th>
-                    <th className="text-left p-4 font-semibold text-sm">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {buyers.map((buyer) => (
-                    <tr key={buyer.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="p-4 font-semibold">{buyer.name}</td>
-                      <td className="p-4 text-muted-foreground text-sm">{buyer.email}</td>
-                      <td className="p-4">{buyer.orders}</td>
-                      <td className="p-4">₹{buyer.spent.toLocaleString()}</td>
-                      <td className="p-4 text-sm text-muted-foreground">{buyer.joinedDate}</td>
-                      <td className="p-4 flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">Total Buyers</p>
+              <p className="text-3xl font-bold">1,923</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Business</p>
+              <p className="text-3xl font-bold text-emerald-600">1,245</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-purple-50">
+              <p className="text-sm text-muted-foreground mb-1">Individual</p>
+              <p className="text-3xl font-bold text-purple-600">678</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Buyers List */}
+        <div className="space-y-4">
+          {buyers.map((buyer) => (
+            <Card key={buyer.id} className="card-hover">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 text-xl">
+                      {buyer.name.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">{buyer.name}</h3>
+                      <Badge variant="outline" className="mb-2">
+                        {buyer.type}
+                      </Badge>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {buyer.location}
+                      </p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Phone className="w-4 h-4" />
+                          {buyer.phone}
+                        </p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Mail className="w-4 h-4" />
+                          {buyer.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <Badge className="status-success">{buyer.status}</Badge>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 py-4 border-y border-border mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Orders</p>
+                    <p className="font-semibold">{buyer.totalOrders}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Spent</p>
+                    <p className="font-semibold text-emerald-600">
+                      ₹{(buyer.totalSpent / 100000).toFixed(1)}L
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Member Since</p>
+                    <p className="font-semibold">{buyer.joinedDate}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Eye className="w-4 h-4" />
+                    View Details
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <ShoppingBag className="w-4 h-4" />
+                    Order History
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </ResponsiveLayout>
   );
 }
 
-/* ============ PRODUCTS MANAGEMENT ============ */
+/* ============ ADMIN VERIFICATIONS ============ */
+export function AdminVerifications() {
+  const verifications = [
+    {
+      id: 1,
+      farmerName: "Amit Singh",
+      location: "Ludhiana, Punjab",
+      phone: "+91 98765 43212",
+      email: "amit.singh@email.com",
+      submittedDate: "2024-01-28",
+      documents: {
+        aadhar: "uploaded",
+        landDocs: "uploaded",
+        bankDetails: "uploaded",
+      },
+      landArea: "5 acres",
+      cropTypes: ["Wheat", "Rice"],
+      status: "pending",
+    },
+    {
+      id: 2,
+      farmerName: "Priya Devi",
+      location: "Meerut, UP",
+      phone: "+91 98765 43213",
+      email: "priya.devi@email.com",
+      submittedDate: "2024-01-29",
+      documents: {
+        aadhar: "uploaded",
+        landDocs: "pending",
+        bankDetails: "uploaded",
+      },
+      landArea: "3 acres",
+      cropTypes: ["Vegetables"],
+      status: "pending",
+    },
+  ];
+
+  return (
+    <ResponsiveLayout title="Farmer Verifications">
+      <div className="space-y-6">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-amber-50">
+              <p className="text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-3xl font-bold text-amber-600">34</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Approved Today</p>
+              <p className="text-3xl font-bold text-emerald-600">12</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-red-50">
+              <p className="text-sm text-muted-foreground mb-1">Rejected</p>
+              <p className="text-3xl font-bold text-red-600">5</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Verifications List */}
+        <div className="space-y-4">
+          {verifications.map((verification) => (
+            <Card key={verification.id} className="card-hover border-2 border-amber-200">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold text-lg">{verification.farmerName}</h3>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      {verification.location}
+                    </p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Phone className="w-4 h-4" />
+                        {verification.phone}
+                      </p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Mail className="w-4 h-4" />
+                        {verification.email}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className="bg-amber-100 text-amber-700">
+                    Pending Review
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4 border-y border-border mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Submitted</p>
+                    <p className="font-semibold">{verification.submittedDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Land Area</p>
+                    <p className="font-semibold">{verification.landArea}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Crops</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {verification.cropTypes.map((crop) => (
+                        <Badge key={crop} variant="outline" className="text-xs">
+                          {crop}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-sm font-semibold mb-3">Documents Status:</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="p-3 border border-border rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-sm font-medium">Aadhar Card</p>
+                        {verification.documents.aadhar === "uploaded" && (
+                          <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        )}
+                      </div>
+                      <Badge className="status-success text-xs">Uploaded</Badge>
+                    </div>
+                    <div className="p-3 border border-border rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-sm font-medium">Land Documents</p>
+                        {verification.documents.landDocs === "uploaded" ? (
+                          <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        ) : (
+                          <Clock className="w-4 h-4 text-amber-600" />
+                        )}
+                      </div>
+                      <Badge
+                        className={
+                          verification.documents.landDocs === "uploaded"
+                            ? "status-success text-xs"
+                            : "bg-amber-100 text-amber-700 text-xs"
+                        }
+                      >
+                        {verification.documents.landDocs === "uploaded"
+                          ? "Uploaded"
+                          : "Pending"}
+                      </Badge>
+                    </div>
+                    <div className="p-3 border border-border rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-sm font-medium">Bank Details</p>
+                        {verification.documents.bankDetails === "uploaded" && (
+                          <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        )}
+                      </div>
+                      <Badge className="status-success text-xs">Uploaded</Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button size="sm" className="gap-2 bg-emerald-600">
+                    <CheckCircle className="w-4 h-4" />
+                    Approve
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2 text-red-600">
+                    <XCircle className="w-4 h-4" />
+                    Reject
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Eye className="w-4 h-4" />
+                    View Documents
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </ResponsiveLayout>
+  );
+}
+
+/* ============ ADMIN PRODUCTS ============ */
 export function AdminProducts() {
+  const [searchTerm, setSearchTerm] = useState("");
+
   const products = [
     {
       id: 1,
       name: "Premium Basmati Rice",
-      farmer: "Kumar Farm Estate",
-      quantity: 500,
-      status: "active",
+      category: "Grains",
+      farmer: "Rajesh Kumar",
+      quantity: "500 kg",
       price: 3450,
+      unit: "quintal",
+      status: "active",
+      rating: 4.8,
+      sales: 245,
     },
     {
       id: 2,
       name: "Organic Tomatoes",
-      farmer: "Green Valley Farms",
-      quantity: 1200,
-      status: "active",
+      category: "Vegetables",
+      farmer: "Suresh Patel",
+      quantity: "1200 kg",
       price: 24,
+      unit: "kg",
+      status: "active",
+      rating: 4.6,
+      sales: 189,
     },
     {
       id: 3,
       name: "Fresh Wheat",
-      farmer: "Punjab Harvest",
-      quantity: 800,
-      status: "active",
+      category: "Grains",
+      farmer: "Amit Singh",
+      quantity: "2000 kg",
       price: 2150,
+      unit: "quintal",
+      status: "pending",
+      rating: 0,
+      sales: 0,
     },
   ];
 
   return (
-    <ResponsiveLayout title="Products">
+    <ResponsiveLayout title="Products Management">
       <div className="space-y-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input placeholder="Search products..." className="pl-10" />
+        {/* Search and Filter */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button variant="outline" className="gap-2">
+            <Filter className="w-4 h-4" />
+            Filters
+          </Button>
         </div>
 
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr>
-                    <th className="text-left p-4 font-semibold text-sm">Product Name</th>
-                    <th className="text-left p-4 font-semibold text-sm">Farmer</th>
-                    <th className="text-left p-4 font-semibold text-sm">Quantity</th>
-                    <th className="text-left p-4 font-semibold text-sm">Price</th>
-                    <th className="text-left p-4 font-semibold text-sm">Status</th>
-                    <th className="text-left p-4 font-semibold text-sm">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((product) => (
-                    <tr key={product.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="p-4 font-semibold">{product.name}</td>
-                      <td className="p-4 text-muted-foreground text-sm">{product.farmer}</td>
-                      <td className="p-4">{product.quantity}</td>
-                      <td className="p-4">₹{product.price.toLocaleString()}</td>
-                      <td className="p-4">
-                        <Badge className="status-success">{product.status}</Badge>
-                      </td>
-                      <td className="p-4 flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </ResponsiveLayout>
-  );
-}
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">Total Products</p>
+              <p className="text-3xl font-bold">1,456</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Active</p>
+              <p className="text-3xl font-bold text-emerald-600">1,389</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-amber-50">
+              <p className="text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-3xl font-bold text-amber-600">45</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-red-50">
+              <p className="text-sm text-muted-foreground mb-1">Out of Stock</p>
+              <p className="text-3xl font-bold text-red-600">22</p>
+            </CardContent>
+          </Card>
+        </div>
 
-/* ============ LISTINGS APPROVAL ============ */
-export function AdminListings() {
-  const pendingListings = [
-    {
-      id: 1,
-      farmer: "New Harvest Co.",
-      product: "Organic Wheat",
-      quantity: 500,
-      price: 2300,
-      submittedDate: "2024-01-15",
-    },
-    {
-      id: 2,
-      farmer: "Kumar Farm Estate",
-      product: "Premium Rice",
-      quantity: 1000,
-      price: 3600,
-      submittedDate: "2024-01-14",
-    },
-  ];
-
-  return (
-    <ResponsiveLayout title="Listings Approval">
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Approval</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {pendingListings.map((listing) => (
-              <div key={listing.id} className="p-4 border border-border rounded-lg">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="font-semibold">{listing.product}</p>
-                    <p className="text-sm text-muted-foreground">{listing.farmer}</p>
+        {/* Products List */}
+        <div className="space-y-4">
+          {products.map((product) => (
+            <Card key={product.id} className="card-hover">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <Package className="w-8 h-8 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        by {product.farmer}
+                      </p>
+                      <Badge variant="outline" className="mt-1">
+                        {product.category}
+                      </Badge>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">{listing.submittedDate}</p>
+                  <Badge
+                    className={
+                      product.status === "active"
+                        ? "status-success"
+                        : "bg-amber-100 text-amber-700"
+                    }
+                  >
+                    {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+                  </Badge>
                 </div>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-3 border-y border-border mb-3">
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y border-border mb-4">
                   <div>
-                    <p className="text-xs text-muted-foreground">Quantity</p>
-                    <p className="font-semibold">{listing.quantity}</p>
+                    <p className="text-sm text-muted-foreground">Price</p>
+                    <p className="font-semibold text-emerald-600">
+                      ₹{product.price.toLocaleString()}/{product.unit}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Price</p>
-                    <p className="font-semibold">₹{listing.price.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Quantity</p>
+                    <p className="font-semibold">{product.quantity}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Rating</p>
+                    {product.rating > 0 ? (
+                      <p className="font-semibold flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        {product.rating}
+                      </p>
+                    ) : (
+                      <p className="font-semibold">N/A</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Sales</p>
+                    <p className="font-semibold">{product.sales}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Approve
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Eye className="w-4 h-4" />
+                    View
                   </Button>
-                  <Button className="flex-1" variant="destructive">
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Reject
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </Button>
+                  {product.status === "pending" && (
+                    <Button size="sm" className="gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      Approve
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" className="gap-2 text-red-600">
+                    <Trash2 className="w-4 h-4" />
+                    Delete
                   </Button>
                 </div>
-              </div>
-            ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </ResponsiveLayout>
+  );
+}
+
+/* ============ ADMIN LISTINGS ============ */
+export function AdminListings() {
+  return (
+    <ResponsiveLayout title="Listings Management">
+      <div className="space-y-6">
+        <Card className="card-hover">
+          <CardContent className="p-12 text-center">
+            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <p className="text-xl font-semibold mb-2">Listings Management</p>
+            <p className="text-muted-foreground">
+              Manage all product listings from farmers
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -547,311 +1257,595 @@ export function AdminListings() {
   );
 }
 
-/* ============ ORDERS MANAGEMENT ============ */
+/* ============ ADMIN ORDERS ============ */
 export function AdminOrders() {
+  const [filterStatus, setFilterStatus] = useState("all");
+
   const orders = [
     {
-      id: "ORD-9021",
-      buyer: "Rajesh Kumar",
-      farmer: "Kumar Farm Estate",
-      amount: 34500,
-      status: "completed",
-      date: "2024-01-15",
+      id: "ORD-8934",
+      buyer: "Kumar Traders",
+      farmer: "Rajesh Kumar",
+      product: "Basmati Rice",
+      quantity: "500 kg",
+      amount: 172500,
+      status: "delivered",
+      date: "2024-01-30",
+      paymentStatus: "completed",
     },
     {
-      id: "ORD-9020",
-      buyer: "Priya Singh",
-      farmer: "Green Valley Farms",
-      amount: 14400,
+      id: "ORD-8933",
+      buyer: "Green Valley Stores",
+      farmer: "Suresh Patel",
+      product: "Tomatoes",
+      quantity: "250 kg",
+      amount: 6000,
+      status: "in-transit",
+      date: "2024-01-30",
+      paymentStatus: "completed",
+    },
+    {
+      id: "ORD-8932",
+      buyer: "Raj Sharma",
+      farmer: "Amit Singh",
+      product: "Wheat",
+      quantity: "100 quintals",
+      amount: 215000,
       status: "processing",
-      date: "2024-01-14",
+      date: "2024-01-29",
+      paymentStatus: "pending",
     },
   ];
 
   return (
-    <ResponsiveLayout title="Orders">
+    <ResponsiveLayout title="Orders Management">
       <div className="space-y-6">
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr>
-                    <th className="text-left p-4 font-semibold text-sm">Order ID</th>
-                    <th className="text-left p-4 font-semibold text-sm">Buyer</th>
-                    <th className="text-left p-4 font-semibold text-sm">Farmer</th>
-                    <th className="text-left p-4 font-semibold text-sm">Amount</th>
-                    <th className="text-left p-4 font-semibold text-sm">Status</th>
-                    <th className="text-left p-4 font-semibold text-sm">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.map((order) => (
-                    <tr key={order.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="p-4 font-semibold">{order.id}</td>
-                      <td className="p-4">{order.buyer}</td>
-                      <td className="p-4">{order.farmer}</td>
-                      <td className="p-4">₹{order.amount.toLocaleString()}</td>
-                      <td className="p-4">
-                        <Badge className={order.status === "completed" ? "status-success" : "bg-amber-100 text-amber-700"}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </Badge>
-                      </td>
-                      <td className="p-4 text-sm text-muted-foreground">{order.date}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {["all", "processing", "in-transit", "delivered", "cancelled"].map(
+            (status) => (
+              <Badge
+                key={status}
+                variant={filterStatus === status ? "default" : "outline"}
+                className="cursor-pointer whitespace-nowrap"
+                onClick={() => setFilterStatus(status)}
+              >
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Badge>
+            )
+          )}
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">Total Orders</p>
+              <p className="text-3xl font-bold">8,934</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-amber-50">
+              <p className="text-sm text-muted-foreground mb-1">Processing</p>
+              <p className="text-3xl font-bold text-amber-600">389</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">In Transit</p>
+              <p className="text-3xl font-bold text-blue-600">156</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Delivered</p>
+              <p className="text-3xl font-bold text-emerald-600">8,311</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Orders List */}
+        <div className="space-y-4">
+          {orders.map((order) => (
+            <Card key={order.id} className="card-hover">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold text-lg">{order.id}</h3>
+                    <p className="text-sm text-muted-foreground">{order.date}</p>
+                  </div>
+                  <Badge
+                    className={
+                      order.status === "delivered"
+                        ? "status-success"
+                        : order.status === "in-transit"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-amber-100 text-amber-700"
+                    }
+                  >
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y border-border mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Buyer</p>
+                    <p className="font-semibold">{order.buyer}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Farmer</p>
+                    <p className="font-semibold">{order.farmer}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Product</p>
+                    <p className="font-semibold">{order.product}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Quantity</p>
+                    <p className="font-semibold">{order.quantity}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-emerald-600">
+                      ₹{order.amount.toLocaleString()}
+                    </p>
+                    <Badge
+                      className={
+                        order.paymentStatus === "completed"
+                          ? "status-success"
+                          : "bg-amber-100 text-amber-700"
+                      }
+                    >
+                      Payment{" "}
+                      {order.paymentStatus.charAt(0).toUpperCase() +
+                        order.paymentStatus.slice(1)}
+                    </Badge>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Eye className="w-4 h-4" />
+                      View Details
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Truck className="w-4 h-4" />
+                      Track
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </ResponsiveLayout>
   );
 }
 
-/* ============ PAYMENTS ============ */
+/* ============ ADMIN PAYMENTS ============ */
 export function AdminPayments() {
   const payments = [
     {
-      id: 1,
-      orderId: "ORD-9021",
-      amount: 34500,
+      id: "PAY-5621",
+      orderId: "ORD-8934",
+      farmer: "Rajesh Kumar",
+      buyer: "Kumar Traders",
+      amount: 172500,
       status: "completed",
-      method: "Bank Transfer",
-      date: "2024-01-15",
+      method: "UPI",
+      date: "2024-01-30",
+      time: "14:30",
     },
     {
-      id: 2,
-      orderId: "ORD-9020",
-      amount: 14400,
+      id: "PAY-5620",
+      orderId: "ORD-8933",
+      farmer: "Suresh Patel",
+      buyer: "Green Valley Stores",
+      amount: 6000,
+      status: "completed",
+      method: "Bank Transfer",
+      date: "2024-01-30",
+      time: "12:15",
+    },
+    {
+      id: "PAY-5619",
+      orderId: "ORD-8932",
+      farmer: "Amit Singh",
+      buyer: "Raj Sharma",
+      amount: 215000,
       status: "pending",
-      method: "UPI",
-      date: "2024-01-14",
+      method: "Bank Transfer",
+      date: "2024-01-29",
+      time: "16:45",
     },
   ];
 
   return (
-    <ResponsiveLayout title="Payments">
+    <ResponsiveLayout title="Payments Management">
       <div className="space-y-6">
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr>
-                    <th className="text-left p-4 font-semibold text-sm">Order ID</th>
-                    <th className="text-left p-4 font-semibold text-sm">Amount</th>
-                    <th className="text-left p-4 font-semibold text-sm">Method</th>
-                    <th className="text-left p-4 font-semibold text-sm">Status</th>
-                    <th className="text-left p-4 font-semibold text-sm">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment) => (
-                    <tr key={payment.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="p-4 font-semibold">{payment.orderId}</td>
-                      <td className="p-4">₹{payment.amount.toLocaleString()}</td>
-                      <td className="p-4">{payment.method}</td>
-                      <td className="p-4">
-                        <Badge className={payment.status === "completed" ? "status-success" : "bg-amber-100 text-amber-700"}>
-                          {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                        </Badge>
-                      </td>
-                      <td className="p-4 text-sm text-muted-foreground">{payment.date}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Total Processed</p>
+              <p className="text-3xl font-bold text-emerald-600">
+                ₹{(45670000 / 10000000).toFixed(1)}Cr
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">Completed</p>
+              <p className="text-3xl font-bold text-blue-600">8,467</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-amber-50">
+              <p className="text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-3xl font-bold text-amber-600">23</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-red-50">
+              <p className="text-sm text-muted-foreground mb-1">Failed</p>
+              <p className="text-3xl font-bold text-red-600">12</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Payments List */}
+        <div className="space-y-4">
+          {payments.map((payment) => (
+            <Card key={payment.id} className="card-hover">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold text-lg">{payment.id}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Order: {payment.orderId}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {payment.date} at {payment.time}
+                    </p>
+                  </div>
+                  <Badge
+                    className={
+                      payment.status === "completed"
+                        ? "status-success"
+                        : payment.status === "pending"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-red-100 text-red-700"
+                    }
+                  >
+                    {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4 border-y border-border mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">From (Buyer)</p>
+                    <p className="font-semibold">{payment.buyer}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">To (Farmer)</p>
+                    <p className="font-semibold">{payment.farmer}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Method</p>
+                    <p className="font-semibold">{payment.method}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <p className="text-2xl font-bold text-emerald-600">
+                    ₹{payment.amount.toLocaleString()}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Eye className="w-4 h-4" />
+                      View Receipt
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Download className="w-4 h-4" />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </ResponsiveLayout>
   );
 }
 
-/* ============ INVOICES ============ */
+/* ============ ADMIN INVOICES ============ */
 export function AdminInvoices() {
   const invoices = [
     {
       id: "INV-2024-001",
-      orderId: "ORD-9021",
-      amount: 34500,
-      date: "2024-01-15",
-      status: "sent",
+      orderId: "ORD-8934",
+      buyer: "Kumar Traders",
+      amount: 172500,
+      tax: 8625,
+      total: 181125,
+      status: "paid",
+      issueDate: "2024-01-30",
+      dueDate: "2024-02-14",
     },
     {
       id: "INV-2024-002",
-      orderId: "ORD-9020",
-      amount: 14400,
-      date: "2024-01-14",
-      status: "draft",
+      orderId: "ORD-8933",
+      buyer: "Green Valley Stores",
+      amount: 6000,
+      tax: 300,
+      total: 6300,
+      status: "paid",
+      issueDate: "2024-01-30",
+      dueDate: "2024-02-14",
+    },
+    {
+      id: "INV-2024-003",
+      orderId: "ORD-8932",
+      buyer: "Raj Sharma",
+      amount: 215000,
+      tax: 10750,
+      total: 225750,
+      status: "pending",
+      issueDate: "2024-01-29",
+      dueDate: "2024-02-13",
     },
   ];
 
   return (
-    <ResponsiveLayout title="Invoices">
+    <ResponsiveLayout title="Invoices Management">
       <div className="space-y-6">
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr>
-                    <th className="text-left p-4 font-semibold text-sm">Invoice ID</th>
-                    <th className="text-left p-4 font-semibold text-sm">Order ID</th>
-                    <th className="text-left p-4 font-semibold text-sm">Amount</th>
-                    <th className="text-left p-4 font-semibold text-sm">Date</th>
-                    <th className="text-left p-4 font-semibold text-sm">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoices.map((invoice) => (
-                    <tr key={invoice.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="p-4 font-semibold">{invoice.id}</td>
-                      <td className="p-4">{invoice.orderId}</td>
-                      <td className="p-4">₹{invoice.amount.toLocaleString()}</td>
-                      <td className="p-4 text-sm text-muted-foreground">{invoice.date}</td>
-                      <td className="p-4">
-                        <Badge className={invoice.status === "sent" ? "status-success" : "bg-gray-100 text-gray-700"}>
-                          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Total Invoiced</p>
+              <p className="text-3xl font-bold text-emerald-600">
+                ₹{(48900000 / 10000000).toFixed(1)}Cr
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">Paid</p>
+              <p className="text-3xl font-bold text-blue-600">8,456</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-amber-50">
+              <p className="text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-3xl font-bold text-amber-600">34</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Invoices List */}
+        <div className="space-y-4">
+          {invoices.map((invoice) => (
+            <Card key={invoice.id} className="card-hover">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold text-lg">{invoice.id}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Order: {invoice.orderId}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Buyer: {invoice.buyer}
+                    </p>
+                  </div>
+                  <Badge
+                    className={
+                      invoice.status === "paid"
+                        ? "status-success"
+                        : "bg-amber-100 text-amber-700"
+                    }
+                  >
+                    {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y border-border mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Issue Date</p>
+                    <p className="font-semibold">{invoice.issueDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Due Date</p>
+                    <p className="font-semibold">{invoice.dueDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Amount</p>
+                    <p className="font-semibold">
+                      ₹{invoice.amount.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tax (5%)</p>
+                    <p className="font-semibold">₹{invoice.tax.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Amount</p>
+                    <p className="text-2xl font-bold text-emerald-600">
+                      ₹{invoice.total.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Eye className="w-4 h-4" />
+                      View
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Download className="w-4 h-4" />
+                      Download PDF
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </ResponsiveLayout>
   );
 }
 
-/* ============ DISPUTES ============ */
+/* ============ ADMIN DISPUTES ============ */
 export function AdminDisputes() {
   const disputes = [
     {
       id: "DIS-001",
-      orderId: "ORD-9019",
-      buyer: "Rajesh Kumar",
-      farmer: "Kumar Farm Estate",
-      issue: "Quality complaint",
-      status: "open",
-      date: "2024-01-13",
+      orderId: "ORD-8920",
+      raisedBy: "Kumar Traders",
+      against: "Rajesh Kumar",
+      reason: "Quality Issue",
+      description: "Received rice with moisture content higher than specified",
+      amount: 172500,
+      status: "under-review",
+      raisedDate: "2024-01-28",
+      priority: "high",
     },
     {
       id: "DIS-002",
-      orderId: "ORD-9018",
-      buyer: "Priya Singh",
-      farmer: "Green Valley Farms",
-      issue: "Late delivery",
-      status: "resolved",
-      date: "2024-01-10",
+      orderId: "ORD-8915",
+      raisedBy: "Raj Sharma",
+      against: "Suresh Patel",
+      reason: "Quantity Mismatch",
+      description: "Ordered 250kg but received only 230kg of tomatoes",
+      amount: 6000,
+      status: "under-review",
+      raisedDate: "2024-01-29",
+      priority: "medium",
     },
   ];
 
   return (
-    <ResponsiveLayout title="Disputes">
+    <ResponsiveLayout title="Disputes Management">
       <div className="space-y-6">
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr>
-                    <th className="text-left p-4 font-semibold text-sm">Dispute ID</th>
-                    <th className="text-left p-4 font-semibold text-sm">Order ID</th>
-                    <th className="text-left p-4 font-semibold text-sm">Issue</th>
-                    <th className="text-left p-4 font-semibold text-sm">Status</th>
-                    <th className="text-left p-4 font-semibold text-sm">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {disputes.map((dispute) => (
-                    <tr key={dispute.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="p-4 font-semibold">{dispute.id}</td>
-                      <td className="p-4">{dispute.orderId}</td>
-                      <td className="p-4">{dispute.issue}</td>
-                      <td className="p-4">
-                        <Badge className={dispute.status === "resolved" ? "status-success" : "bg-red-100 text-red-700"}>
-                          {dispute.status.charAt(0).toUpperCase() + dispute.status.slice(1)}
-                        </Badge>
-                      </td>
-                      <td className="p-4 text-sm text-muted-foreground">{dispute.date}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </ResponsiveLayout>
-  );
-}
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-amber-50">
+              <p className="text-sm text-muted-foreground mb-1">Active Disputes</p>
+              <p className="text-3xl font-bold text-amber-600">8</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-red-50">
+              <p className="text-sm text-muted-foreground mb-1">High Priority</p>
+              <p className="text-3xl font-bold text-red-600">3</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-emerald-50">
+              <p className="text-sm text-muted-foreground mb-1">Resolved</p>
+              <p className="text-3xl font-bold text-emerald-600">142</p>
+            </CardContent>
+          </Card>
+          <Card className="card-hover">
+            <CardContent className="p-6 bg-blue-50">
+              <p className="text-sm text-muted-foreground mb-1">Resolution Rate</p>
+              <p className="text-3xl font-bold text-blue-600">94.7%</p>
+            </CardContent>
+          </Card>
+        </div>
 
-/* ============ VERIFICATIONS ============ */
-export function AdminVerifications() {
-  const pendingVerifications = [
-    {
-      id: 1,
-      type: "Farmer",
-      name: "New Harvest Co.",
-      email: "newharvest@example.com",
-      submittedDate: "2024-01-15",
-      documents: "Land document, ID proof",
-    },
-    {
-      id: 2,
-      type: "Buyer",
-      name: "Rajesh Kumar",
-      email: "rajesh@example.com",
-      submittedDate: "2024-01-14",
-      documents: "ID proof, Address proof",
-    },
-  ];
-
-  return (
-    <ResponsiveLayout title="User Verification">
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Verifications</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {pendingVerifications.map((verification) => (
-              <div key={verification.id} className="p-4 border border-border rounded-lg">
-                <div className="flex items-start justify-between mb-3">
+        {/* Disputes List */}
+        <div className="space-y-4">
+          {disputes.map((dispute) => (
+            <Card
+              key={dispute.id}
+              className="card-hover border-2"
+              style={{
+                borderColor:
+                  dispute.priority === "high"
+                    ? "rgb(239 68 68)"
+                    : dispute.priority === "medium"
+                    ? "rgb(245 158 11)"
+                    : "rgb(59 130 246)",
+              }}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <Badge className="mb-2">{verification.type}</Badge>
-                    <p className="font-semibold">{verification.name}</p>
-                    <p className="text-sm text-muted-foreground">{verification.email}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg">{dispute.id}</h3>
+                      <Badge
+                        className={
+                          dispute.priority === "high"
+                            ? "bg-red-100 text-red-700"
+                            : dispute.priority === "medium"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-blue-100 text-blue-700"
+                        }
+                      >
+                        {dispute.priority.charAt(0).toUpperCase() +
+                          dispute.priority.slice(1)}{" "}
+                        Priority
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Order: {dispute.orderId}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Raised on: {dispute.raisedDate}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{verification.submittedDate}</p>
+                  <Badge className="bg-amber-100 text-amber-700">Under Review</Badge>
                 </div>
 
-                <div className="py-3 border-y border-border mb-3">
-                  <p className="text-sm text-muted-foreground mb-1">Documents</p>
-                  <p className="text-sm">{verification.documents}</p>
+                <div className="p-4 bg-muted rounded-lg mb-4">
+                  <p className="text-sm font-semibold mb-1">{dispute.reason}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {dispute.description}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4 border-y border-border mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Raised By</p>
+                    <p className="font-semibold">{dispute.raisedBy}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Against</p>
+                    <p className="font-semibold">{dispute.against}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Disputed Amount</p>
+                    <p className="font-semibold text-red-600">
+                      ₹{dispute.amount.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Approve
+                  <Button size="sm" className="gap-2 bg-emerald-600">
+                    <CheckCircle className="w-4 h-4" />
+                    Resolve in Favor of Buyer
                   </Button>
-                  <Button className="flex-1" variant="destructive">
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Reject
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Scale className="w-4 h-4" />
+                    Resolve in Favor of Farmer
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Eye className="w-4 h-4" />
+                    View Details
                   </Button>
                 </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </ResponsiveLayout>
   );

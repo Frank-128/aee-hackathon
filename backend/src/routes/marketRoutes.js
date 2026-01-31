@@ -17,5 +17,8 @@ router.get('/price-trends', getPriceTrends);
 router.get('/recommended-prices', getRecommendedPrices);
 router.get('/market-snapshots', getMarketSnapshots);
 
+aiRouter.post('/crop', predictCrop);
+aiRouter.post('/yield', predictYield);
+aiRouter.post('/price', predictPrice);
 
-module.exports = { marketRouter: router };
+module.exports = { marketRouter: router, aiRouter };

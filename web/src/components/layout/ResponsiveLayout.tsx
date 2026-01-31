@@ -45,7 +45,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -208,8 +208,8 @@ export function ResponsiveLayout({
     role === 'admin'
       ? adminNavSections
       : role === 'buyer'
-      ? buyerNavSections
-      : farmerNavSections;
+        ? buyerNavSections
+        : farmerNavSections;
 
   const isActive = (path?: string) => path ? location.pathname === path : false;
 
@@ -273,7 +273,7 @@ export function ResponsiveLayout({
       <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto custom-scrollbar">
         {navSections.map((section, idx) => {
           const isExpanded = !section.collapsible || expandedSections.has(section.title || '');
-          
+
           return (
             <div key={idx} className="space-y-1.5">
               {section.title && (
@@ -294,7 +294,7 @@ export function ResponsiveLayout({
                   )}
                 </button>
               )}
-              
+
               <div className={cn(
                 "space-y-0.5 transition-all duration-200 overflow-hidden",
                 !isExpanded && "max-h-0"
@@ -496,8 +496,8 @@ export function ResponsiveLayout({
                   onClick={() => navigate(item.path || '/')}
                   className={cn(
                     "flex flex-col items-center justify-center gap-1.5 px-3 py-2 rounded-xl transition-all min-w-0 flex-1",
-                    active 
-                      ? "text-emerald-600 dark:text-emerald-400 font-semibold" 
+                    active
+                      ? "text-emerald-600 dark:text-emerald-400 font-semibold"
                       : "text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400"
                   )}
                 >
@@ -512,6 +512,10 @@ export function ResponsiveLayout({
         {/* Mobile Sidebar */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetContent side="left" className="w-72 p-0 bg-transparent border-r border-emerald-100 dark:border-slate-800">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <SheetDescription className="sr-only">
+              Mobile navigation sidebar for the application.
+            </SheetDescription>
             <SidebarContent onNavigate={() => setSidebarOpen(false)} />
           </SheetContent>
         </Sheet>
@@ -530,6 +534,10 @@ export function ResponsiveLayout({
       {/* Tablet Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-72 p-0 bg-transparent border-r border-emerald-100 dark:border-slate-800 lg:hidden">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          <SheetDescription className="sr-only">
+            Navigation sidebar for tablet and desktop views.
+          </SheetDescription>
           <SidebarContent onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>

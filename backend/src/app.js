@@ -42,8 +42,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/farmers', farmerRoutes);
 app.use('/api/buyers', buyerRoutes);
 app.use('/api/market', marketRouter);
+
 app.use('/api/ai', aiRoutes);
 // app.use('/api/predictions', aiRouter); // Removed old mock AI
+
 app.use('/api/matching', matchingRouter);
 app.use('/api/deals', dealsRouter);
 app.use('/api/support', supportRoutes);

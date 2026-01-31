@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "react-router-dom";
+
 import {
   Send,
   Image as ImageIcon,
@@ -283,13 +285,18 @@ const formatTimestamp = (date: Date): string => {
   return date.toLocaleDateString();
 };
 
-const formatMessageTime = (date: Date): string => {
-  return date.toLocaleTimeString("en-US", {
+const formatMessageTime = (date: Date | string): string => {
+  const d = typeof date === "string" ? new Date(date) : date;
+
+  if (isNaN(d.getTime())) return "";
+
+  return d.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
   });
 };
+
 
 const getChatIcon = (type: ChatType) => {
   switch (type) {
@@ -301,6 +308,36 @@ const getChatIcon = (type: ChatType) => {
       return <User className="w-4 h-4" />;
   }
 };
+/* ============================================
+   LOCAL STORAGE HELPERS
+============================================ */
+
+const getStoredMessages = (conversationId: string): Message[] => {
+  const stored = localStorage.getItem(`messages_${conversationId}`);
+  if (!stored) return [];
+
+  try {
+    const parsed = JSON.parse(stored);
+
+    // 🔥 Convert timestamp strings back to Date objects
+    return parsed.map((msg: any) => ({
+      ...msg,
+      timestamp: new Date(msg.timestamp),
+    }));
+  } catch {
+    return [];
+  }
+};
+
+
+const saveStoredMessages = (conversationId: string, messages: Message[]) => {
+  localStorage.setItem(
+    `messages_${conversationId}`,
+    JSON.stringify(messages)
+  );
+};
+
+
 
 /* ============================================
    CHAT LIST ITEM COMPONENT
@@ -461,6 +498,51 @@ export default function FarmerMessages() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
 
+  const [searchParams] = useSearchParams();
+  const targetId = searchParams.get("to");
+  const targetName = searchParams.get("name");
+
+  const openOrCreateConversation = (
+    farmerId: string,
+    farmerName: string
+  ) => {
+    setConversations((prev) => {
+      const existing = prev.find(
+        (c) => c.contextType === "SYSTEM" && c.contextId === farmerId
+      );
+
+      if (existing) {
+        setActiveConversation(existing);
+        setMessages(getStoredMessages(existing.id));
+        return prev;
+      }
+
+      const newConversation: Conversation = {
+        id: `conv-${Date.now()}`,
+        type: "buyer",
+        contextType: "SYSTEM",
+        contextId: farmerId,
+        participantName: farmerName,
+        lastMessage: "",
+        lastMessageTime: new Date(),
+        unreadCount: 0,
+        contextLabel: "Direct Farmer Chat",
+        isOnline: true,
+      };
+
+      setActiveConversation(newConversation);
+      setMessages([]);
+
+      return [newConversation, ...prev];
+    });
+  };
+
+  useEffect(() => {
+    if (!targetId || !targetName) return;
+    openOrCreateConversation(targetId, decodeURIComponent(targetName));
+  }, [targetId, targetName]);
+
+
   const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(
     mockConversations[0]
@@ -488,8 +570,8 @@ export default function FarmerMessages() {
   // Handle conversation selection
   const handleSelectConversation = (conversation: Conversation) => {
     setActiveConversation(conversation);
-    setMessages(mockMessages[conversation.id] || []);
-    
+    setMessages(getStoredMessages(conversation.id));
+
     // Mark as read
     setConversations((prev) =>
       prev.map((c) =>
@@ -497,7 +579,6 @@ export default function FarmerMessages() {
       )
     );
 
-    // Hide chat list on mobile
     if (isMobile) {
       setShowChatList(false);
     }
@@ -519,16 +600,18 @@ export default function FarmerMessages() {
       delivered: false,
     };
 
-    // Add message
-    setMessages((prev) => [...prev, newMessage]);
+    // ✅ Add + persist messages (SINGLE source of truth)
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+    saveStoredMessages(activeConversation.id, updatedMessages);
 
-    // Update conversation last message
+    // ✅ Update conversation preview
     setConversations((prev) =>
       prev.map((c) =>
         c.id === activeConversation.id
           ? {
               ...c,
-              lastMessage: messageInput.trim(),
+              lastMessage: newMessage.content,
               lastMessageTime: new Date(),
             }
           : c
@@ -538,21 +621,22 @@ export default function FarmerMessages() {
     // Clear input
     setMessageInput("");
 
-    // Simulate delivery & seen status
+    // Simulate delivery
     setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === newMessage.id ? { ...m, delivered: true } : m
-        )
+      const deliveredMessages = updatedMessages.map((m) =>
+        m.id === newMessage.id ? { ...m, delivered: true } : m
       );
+      setMessages(deliveredMessages);
+      saveStoredMessages(activeConversation.id, deliveredMessages);
     }, 500);
 
+    // Simulate seen
     setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === newMessage.id ? { ...m, seen: true } : m
-        )
+      const seenMessages = updatedMessages.map((m) =>
+        m.id === newMessage.id ? { ...m, seen: true } : m
       );
+      setMessages(seenMessages);
+      saveStoredMessages(activeConversation.id, seenMessages);
     }, 2000);
   };
 
