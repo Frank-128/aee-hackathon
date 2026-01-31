@@ -7,8 +7,8 @@ class WelcomeLanguagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> languages = [
-  {'title': 'IN', 'subtitle': 'हिंदी', 'selected': true},
-  {'title': 'GB', 'subtitle': 'English'},
+  {'title': 'IN', 'subtitle': 'हिंदी', },
+  {'title': 'GB', 'subtitle': 'English','selected': true},
   {'title': 'मराठी', 'subtitle': 'Marathi'},
   {'title': 'ਪੰਜਾਬੀ', 'subtitle': 'Punjabi'},
 ];
@@ -34,10 +34,10 @@ class WelcomeLanguagePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'AgriMarket',
+                      'Rhino',
                       style: TextStyle(
                         fontSize: 26,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         color: Color(0xFF2E7D32),
                       ),
                     ),

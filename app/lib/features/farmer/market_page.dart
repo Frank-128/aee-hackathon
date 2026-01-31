@@ -1,3 +1,4 @@
+import 'package:app/core/widgets/timeseries.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
@@ -156,10 +157,7 @@ class PriceTrendSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           child: const Center(
-            child: Text(
-              '📊 Line Chart Placeholder',
-              style: TextStyle(color: Colors.grey),
-            ),
+            child: TimeSeriesAnalysisApp()
           ),
         )
       ],

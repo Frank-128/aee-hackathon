@@ -1,24 +1,25 @@
-import 'package:app/features/farmer/requests.dart';
 import 'package:flutter/material.dart';
-import '../../features/farmer/farmer_dashboard.dart';
-import '../../features/farmer/market_page.dart';
-import '../../features/farmer/farmer_analytics_page.dart';
+import 'package:app/features/buyer/buyer_home_page.dart';
+import 'package:app/features/buyer/buyer_market_page.dart';
+import 'package:app/features/buyer/buyer_orders_page.dart';
+import 'package:app/features/account/account_page.dart';
 
-class FarmerShell extends StatefulWidget {
-  const FarmerShell({super.key});
+
+class BuyerShell extends StatefulWidget {
+  const BuyerShell({super.key});
 
   @override
-  State<FarmerShell> createState() => _FarmerShellState();
+  State<BuyerShell> createState() => _BuyerShellState();
 }
 
-class _FarmerShellState extends State<FarmerShell> {
+class _BuyerShellState extends State<BuyerShell> {
   int currentIndex = 0;
 
   final pages = const [
-    FarmerDashboard(),
-    MarketPage(),
-    BuyerRequestsPage(),
-    FarmerAnalyticsPage(),
+    BuyerHomePage(),
+    BuyerMarketPage(),
+    BuyerOrdersPage(),
+    AccountPage(),
   ];
 
   @override
@@ -26,12 +27,17 @@ class _FarmerShellState extends State<FarmerShell> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FBF9),
 
+      body: IndexedStack(
+        index: currentIndex,
+        children: pages,
+      ),
+
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF2E7D32),
         onPressed: () {
-          Navigator.pushNamed(context, '/farmer/add-crop');
+          // later: quick buy / post request
         },
-        child: const Icon(Icons.add,color:Colors.white),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
@@ -46,16 +52,11 @@ class _FarmerShellState extends State<FarmerShell> {
               _navItem(Icons.home, 'Home', 0),
               _navItem(Icons.store, 'Market', 1),
               const SizedBox(width: 40),
-              _navItem(Icons.inbox, 'Requests', 2),
-              _navItem(Icons.analytics, 'Analytics', 3),
+              _navItem(Icons.list_alt, 'Orders', 2),
+              _navItem(Icons.person, 'Profile', 3),
             ],
           ),
         ),
-      ),
-
-      body: IndexedStack(
-        index: currentIndex,
-        children: pages,
       ),
     );
   }

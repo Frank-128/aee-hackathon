@@ -9,7 +9,7 @@ class RoleSelectionPage extends StatefulWidget {
 }
 
 class _RoleSelectionPageState extends State<RoleSelectionPage> {
-  String selectedRole = 'farmer'; // default
+  String selectedRole = 'FARMER'; // default
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +69,9 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                       title: 'Farmer',
                       subtitle: 'Sell crops & get AI price insights',
                       icon: Icons.agriculture,
-                      selected: selectedRole == 'farmer',
+                      selected: selectedRole == 'FARMER',
                       onTap: () {
-                        setState(() => selectedRole = 'farmer');
+                        setState(() => selectedRole = 'FARMER');
                       },
                     ),
                     const SizedBox(height: 16),
@@ -79,9 +79,9 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                       title: 'Buyer',
                       subtitle: 'Buy crops directly from farmers',
                       icon: Icons.storefront,
-                      selected: selectedRole == 'buyer',
+                      selected: selectedRole == 'BUYER',
                       onTap: () {
-                        setState(() => selectedRole = 'buyer');
+                        setState(() => selectedRole = 'BUYER');
                       },
                     ),
                   ],
@@ -94,14 +94,13 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    if (selectedRole == 'farmer') {
-                      Navigator.pushReplacementNamed(context, AppRoutes.farmerShell);
-                      debugPrint('Farmer selected');
-                    } else {
-                      // Navigator.pushReplacementNamed(context, AppRoutes.buyerDashboard);
-                      debugPrint('Buyer selected');
-                    }
+                    Navigator.pushReplacementNamed(
+                      context,
+                      AppRoutes.signUp,
+                      arguments: selectedRole, 
+                    );
                   },
+
                   child: const Text('Continue'),
                 ),
               ),
@@ -112,8 +111,6 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
     );
   }
 }
-
-
 
 class RoleBox extends StatelessWidget {
   final String title;
@@ -168,10 +165,7 @@ class RoleBox extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
+                  Text(subtitle, style: const TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
