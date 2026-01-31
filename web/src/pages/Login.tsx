@@ -13,61 +13,17 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 
-/* ------------------ Dummy DB ------------------ */
-
-type UserRecord = {
-  email: string;
-  password: string;
-  role: "farmer" | "buyer" | "admin";
-};
-
-const dummyUsers: UserRecord[] = [
-  {
-    email: "farmer@test.com",
-    password: "Farmer@123",
-    role: "farmer",
-  },
-  {
-    email: "buyer@test.com",
-    password: "Buyer@123",
-    role: "buyer",
-  },
-  {
-    email: "admin@test.com",
-    password: "Admin@123",
-    role: "admin",
-  },
-];
-
-/* ------------------ Utils ------------------ */
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/* ------------------ Auth Function ------------------ */
-
-const authenticateUser = (
-  email: string,
-  password: string
-): UserRecord | null => {
-  return (
-    dummyUsers.find(
-      (user) =>
-        user.email.toLowerCase() === email.toLowerCase() &&
-        user.password === password
-    ) || null
-  );
-};
-
 /* ------------------ Component ------------------ */
 
 const Login = () => {
   const navigate = useNavigate();
-  const { loginDemo } = useAuth();
+  const { login } = useAuth(); // Use login instead of loginDemo
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       toast({
         title: "Missing fields",
@@ -77,27 +33,53 @@ const Login = () => {
       return;
     }
 
-    const user = authenticateUser(email, password);
+    setIsLoading(true);
 
-    if (!user) {
+    try {
+      await login({ email, password });
+
+      // Get user from context after successful login
+      const storedUser = localStorage.getItem("user");
+      let userRole = 'buyer'; // Default fallback
+      console.log(storedUser);
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          userRole = parsedUser.role.toLowerCase();
+        } catch (parseError) {
+          console.error("Failed to parse user data:", parseError);
+        }
+      }
+
+      toast({
+        title: "Login successful",
+        description: `Welcome back!`,
+      });
+
+      // Redirect based on role
+      navigate(`/${userRole}/dashboard`);
+    } catch (error: any) {
+      console.error("Login error:", error);
+
+      // Extract error message from various possible error structures
+      let errorMessage = "Invalid credentials";
+
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Login failed",
-        description: "Invalid email or password",
+        description: errorMessage,
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    // ✅ SET AUTH CONTEXT (THIS WAS MISSING)
-    loginDemo(user.email, user.role);
-
-    toast({
-      title: "Login successful",
-      description: `Welcome back, ${user.role}!`,
-    });
-
-    // ✅ Redirect
-    navigate(`/${user.role}/dashboard`);
   };
 
   return (

@@ -1,11 +1,7 @@
 import { useState } from "react";
-import {
-  MapContainer as LeafletMap,
-  TileLayer as LeafletTileLayer,
-  Marker as LeafletMarker,
-  Popup,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 import { Truck, Users, MessageCircle } from "lucide-react";
 
@@ -14,17 +10,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-/* ---------------- TYPE ESCAPE (REACT-LEAFLET FIX) ---------------- */
-const MapContainer = LeafletMap as any;
-const TileLayer = LeafletTileLayer as any;
-const Marker = LeafletMarker as any;
-const PopupLeaflet = Popup as any;
+/* ---------------- FIX LEAFLET ICON BUG ---------------- */
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 /* ---------------- USER LOCATION ---------------- */
-const userLocation = {
-  lat: 18.5204,
-  lng: 73.8567,
-};
+const userLocation: [number, number] = [18.5204, 73.8567];
 
 /* ---------------- MOCK FARMERS ---------------- */
 const farmers = [
@@ -32,8 +31,7 @@ const farmers = [
     id: "f1",
     name: "Ramesh Patel",
     village: "Kothrud",
-    lat: 18.5074,
-    lng: 73.8077,
+    position: [18.5074, 73.8077] as [number, number],
     distanceKm: 2.3,
     crop: "Wheat",
     quantity: "Bulk",
@@ -42,49 +40,20 @@ const farmers = [
     id: "f2",
     name: "Suresh Yadav",
     village: "Baner",
-    lat: 18.559,
-    lng: 73.7868,
+    position: [18.559, 73.7868] as [number, number],
     distanceKm: 4.8,
     crop: "Wheat",
     quantity: "Bulk",
   },
 ];
 
-/* ---------------- FARMER ICON ---------------- */
-const farmerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-
-/* ---------------- GOOGLE-STYLE USER DOT ---------------- */
-const userDotIcon = L.divIcon({
-  className: "",
-  html: `
-    <div class="user-location-dot">
-      <span></span>
-    </div>
-  `,
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-});
-
-/* ---------------- COMPONENT ---------------- */
 export default function FarmerNearbyFarmers() {
-  // ✅ CLICK-BASED popup state (NOT hover)
-  const [activeFarmerId, setActiveFarmerId] = useState<string | null>(
-    null
-  );
+  const [activeFarmerId, setActiveFarmerId] = useState<string | null>(null);
 
   return (
     <ResponsiveLayout title="Nearby Farmers">
       <div className="space-y-6 max-w-6xl mx-auto">
 
-        {/* HEADER */}
         <div>
           <h1 className="text-2xl font-bold">Nearby Farmers</h1>
           <p className="text-muted-foreground">
@@ -94,64 +63,42 @@ export default function FarmerNearbyFarmers() {
 
         {/* MAP */}
         <Card>
-          <CardContent className="p-0 h-[65vh] min-h-[450px] rounded-2xl overflow-hidden">
+          <CardContent className="p-0 h-[65vh] min-h-[450px] overflow-hidden rounded-xl">
             <MapContainer
-              center={[userLocation.lat, userLocation.lng]}
+              center={userLocation}
               zoom={12}
               className="h-full w-full"
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-              {/* USER LOCATION */}
-              <Marker
-                position={[userLocation.lat, userLocation.lng]}
-                icon={userDotIcon}
-              >
-                <PopupLeaflet>You are here</PopupLeaflet>
+              <Marker position={userLocation}>
+                <Popup>You are here</Popup>
               </Marker>
 
-              {/* FARMER MARKERS */}
               {farmers.map((f) => (
                 <Marker
                   key={f.id}
-                  position={[f.lat, f.lng]}
-                  icon={farmerIcon}
+                  position={f.position}
                   eventHandlers={{
                     click: () => setActiveFarmerId(f.id),
                   }}
                 >
-                  {activeFarmerId === f.id && (
-                    <PopupLeaflet offset={[0, -20]}>
-                      <div className="space-y-2 min-w-[200px]">
-                        <p className="font-bold">{f.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {f.village} • {f.distanceKm} km away
-                        </p>
-
-                        <Badge className="bg-emerald-100 text-emerald-700">
-                          {f.crop} • {f.quantity}
-                        </Badge>
-
-                        <Button
-                          size="sm"
-                          className="w-full"
-                          onClick={() =>
-                            (window.location.href =
-                              `/farmer/nearby-farmers/${f.id}`)
-                          }
-                        >
-                          View Full Profile
-                        </Button>
-                      </div>
-                    </PopupLeaflet>
-                  )}
+                  <Popup>
+                    <p className="font-bold">{f.name}</p>
+                    <p className="text-sm">
+                      {f.village} • {f.distanceKm} km
+                    </p>
+                    <Badge className="mt-2 bg-emerald-100 text-emerald-700">
+                      {f.crop} • {f.quantity}
+                    </Badge>
+                  </Popup>
                 </Marker>
               ))}
             </MapContainer>
           </CardContent>
         </Card>
 
-        {/* FARMER LIST */}
+        {/* LIST */}
         <div className="grid gap-4">
           {farmers.map((f) => (
             <Card key={f.id}>
@@ -184,37 +131,6 @@ export default function FarmerNearbyFarmers() {
             </Card>
           ))}
         </div>
-
-        {/* USER DOT STYLES */}
-        <style>{`
-          .user-location-dot {
-            position: relative;
-            width: 14px;
-            height: 14px;
-            background: #1a73e8;
-            border-radius: 50%;
-            box-shadow: 0 0 0 4px rgba(26,115,232,0.25);
-          }
-
-          .user-location-dot span {
-            position: absolute;
-            inset: -10px;
-            border-radius: 50%;
-            background: rgba(26,115,232,0.25);
-            animation: pulse 2s infinite;
-          }
-
-          @keyframes pulse {
-            0% {
-              transform: scale(0.5);
-              opacity: 0.8;
-            }
-            100% {
-              transform: scale(1.5);
-              opacity: 0;
-            }
-          }
-        `}</style>
 
       </div>
     </ResponsiveLayout>

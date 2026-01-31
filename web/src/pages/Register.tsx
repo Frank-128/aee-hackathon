@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { User, Users, Eye, EyeOff, ShieldCheck, ArrowRight, ArrowLeft } from "lucide-react";
 
 /* ------------------ Types ------------------ */
@@ -41,6 +42,7 @@ const fetchStatesAndDistricts = async (): Promise<StateDistrictMap> => {
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useAuth(); // Use register from context
 
   const [step, setStep] = useState<Step>("role");
   const [role, setRole] = useState<Role | null>(null);
@@ -62,6 +64,8 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [statesData, setStatesData] = useState<StateDistrictMap>({});
 
@@ -85,7 +89,7 @@ const Register = () => {
     setStep("details");
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (
       !firstName ||
       !lastName ||
@@ -132,12 +136,66 @@ const Register = () => {
       return;
     }
 
-    toast({
-      title: "Registration successful",
-      description: `Account created as ${role}`,
-    });
+    if (!role) {
+      toast({
+        title: "Error",
+        description: "Role is missing",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    navigate("/login");
+    setIsLoading(true);
+
+    try {
+      // Backend expects role in UPPERCASE, but frontend uses lowercase
+      await register({
+        name: `${firstName} ${lastName}`,
+        email,
+        password,
+        role: role.toUpperCase() as any, // Send UPPERCASE to backend
+      });
+
+      toast({
+        title: "Registration successful",
+        description: `Account created as ${role}`,
+      });
+
+      // Navigate using lowercase role for frontend routing
+      navigate(`/${role.toLowerCase()}/dashboard`);
+
+    } catch (error: any) {
+      console.error("Registration error:", error);
+
+      // Extract error message from various possible error structures
+      let errorMessage = "Something went wrong";
+
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+
+        // Handle different error response formats
+        if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+          // Handle validation errors array
+          errorMessage = errorData.errors[0].msg || errorData.errors[0].message || errorData.errors[0];
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      toast({
+        title: "Registration failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

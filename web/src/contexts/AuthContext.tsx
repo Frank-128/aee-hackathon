@@ -5,70 +5,23 @@ import React, {
   useState,
   ReactNode,
 } from "react";
+import { authService, LoginData, RegisterData } from "@/services/authService";
+import { User, UserRole } from "@/types";
 
 /* -------------------- Types -------------------- */
-
-export type UserRole = "farmer" | "buyer" | "admin";
-
-export interface User {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  role: UserRole;
-  avatar?: string;
-  city?: string;
-  state?: string;
-}
-
-
-interface AuthResult {
-  success: boolean;
-  error?: string;
-  user?: User;
-}
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  loginDemo: (email: string, role: UserRole) => AuthResult;
+  login: (data: LoginData) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
   logout: () => void;
 }
 
 /* -------------------- Context -------------------- */
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-/* -------------------- Mock Users (DEMO ONLY) -------------------- */
-
-const mockUsers: Record<UserRole, User> = {
-  farmer: {
-    id: "farmer-1",
-    name: "Ramesh Kumar",
-    email: "farmer@test.com",
-    role: "farmer",
-    city: "Ludhiana",
-    state: "Punjab",
-  },
-  buyer: {
-    id: "buyer-1",
-    name: "Anita Verma",
-    email: "buyer@test.com",
-    role: "buyer",
-    city: "Mumbai",
-    state: "Maharashtra",
-  },
-  admin: {
-    id: "admin-1",
-    name: "Admin User",
-    email: "admin@test.com",
-    role: "admin",
-    city: "Bengaluru",
-    state: "Karnataka",
-  },
-};
-
 
 /* -------------------- Provider -------------------- */
 
@@ -78,34 +31,85 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /* ---------- Restore session on refresh ---------- */
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
+    const initAuth = async () => {
+      const token = localStorage.getItem("auth_token");
+      if (token) {
+        try {
+          const response = await authService.getCurrentUser();
+          // Handle ApiResponse<User> format: { success, data: User }
+          const userData = (response.data || response) as User;
 
-  /* ---------------- Login (Demo) ---------------- */
-  const loginDemo = (email: string, role: UserRole): AuthResult => {
-    const baseUser = mockUsers[role];
+          // Normalize the user role to lowercase
+          const normalizedUser: User = {
+            _id: userData._id,
+            name: userData.name,
+            email: userData.email,
+            role: userData.role.toLowerCase() as UserRole,
+            phone: userData.phone,
+            avatar: userData.avatar,
+            city: userData.city,
+            state: userData.state,
+            createdAt: userData.createdAt,
+          };
 
-    const loggedUser: User = {
-      ...baseUser,
-      email,
+          setUser(normalizedUser);
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("user");
+        }
+      }
+      setIsLoading(false);
     };
 
-    setUser(loggedUser);
-    localStorage.setItem("user", JSON.stringify(loggedUser));
-    localStorage.setItem("auth_token", "demo-token");
+    initAuth();
+  }, []);
 
-    return { success: true, user: loggedUser };
+  /* ---------------- Login ---------------- */
+  const login = async (data: LoginData) => {
+    try {
+      const response = await authService.login(data);
+
+      const normalizedUser: User = {
+        _id: response._id,
+        name: response.name,
+        email: response.email,
+        role: response.role.toLowerCase() as UserRole,
+      };
+
+      localStorage.setItem("auth_token", response.token);
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
+      setUser(normalizedUser);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  /* ---------------- Register ---------------- */
+  const register = async (data: RegisterData) => {
+    try {
+      const response = await authService.register(data);
+
+      const normalizedUser: User = {
+        _id: response._id,
+        name: response.name,
+        email: response.email,
+        role: response.role.toLowerCase() as UserRole,
+      };
+
+      localStorage.setItem("auth_token", response.token);
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
+      setUser(normalizedUser);
+    } catch (error) {
+      throw error;
+    }
   };
 
   /* ---------------- Logout ---------------- */
   const logout = () => {
+    authService.logout();
     setUser(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("auth_token");
+    window.location.href = "/login"; // Force redirect
   };
 
   return (
@@ -114,7 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isAuthenticated: !!user,
         isLoading,
-        loginDemo,
+        login,
+        register,
         logout,
       }}
     >
@@ -132,3 +137,7 @@ export function useAuth() {
   }
   return context;
 }
+
+// Re-export types for convenience
+export type { User, UserRole };
+

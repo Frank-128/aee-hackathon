@@ -1,5 +1,5 @@
 import React from "react";
-import SupplyHeatmap from "@/components/common/SupplyHeatmap";
+// import SupplyHeatmap from "@/components/common/SupplyHeatmap"; // Temporarily disabled due to React hooks issue
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -16,39 +16,69 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
+// Add missing imports
+import { marketService } from "@/services/marketService";
+import { buyerService } from "@/services/buyerService";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
+
 /* ============ BUYER DASHBOARD ============ */
 export function BuyerDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get user for greeting
 
   /* ---------- DATA ---------- */
+  const [marketPrices, setMarketPrices] = useState<any[]>([]);
+  const [smartPicks, setSmartPicks] = useState<any[]>([]);
+  const [demands, setDemands] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const marketPrices = [
-    { name: "Tomato (Hybrid)", price: "₹24/kg", change: "+12%", up: true, emoji: "🍅" },
-    { name: "Wheat (Sonalika)", price: "₹2,150/q", change: "-4%", up: false, emoji: "🌾" },
-    { name: "Onion", price: "₹18/kg", change: "+6%", up: true, emoji: "🧅" },
-  ];
-
-  const smartPicks = [
-    {
-      name: "Fresh Potato (Organic)",
-      info: "500kg available • 12km away",
-      price: "₹16.50/kg",
-      action: "Buy Now",
-    },
-    {
-      name: "Sweet Corn (Grade A)",
-      info: "2 Tons • Expected price drop",
-      price: "₹22.00/kg",
-      action: "Pre-book",
-    },
-  ];
-
+  // Fallback data if API not ready
   const activeOrder = {
     id: "ORD-9021",
     status: "In-transit from Sangli",
     progress: "85% Processed",
     eta: "Today 6:30 PM",
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch market price trends
+        const pricesResponse = await marketService.getPriceTrends();
+        const pricesData = pricesResponse.data;
+        if (pricesData && Array.isArray(pricesData)) {
+          setMarketPrices(pricesData.slice(0, 3)); // Show top 3
+        }
+
+        // Fetch buyer demands
+        const demandsResponse = await buyerService.getDemands();
+        const demandsData = demandsResponse.data;
+        if (demandsData && Array.isArray(demandsData)) {
+          setDemands(demandsData);
+        }
+
+        // Fetch farmer listings for smart picks
+        const listingsResponse = await buyerService.getFarmerListings();
+        const listingsData = listingsResponse.data;
+        if (listingsData && Array.isArray(listingsData)) {
+          const picks = listingsData.slice(0, 2).map((l: any) => ({
+            name: l.cropName || "Unknown Crop",
+            info: `${l.quantity} ${l.unit} available`,
+            price: `₹${l.pricePerUnit}/${l.unit}`,
+            action: "Buy Now"
+          }));
+          setSmartPicks(picks);
+        }
+
+      } catch (err) {
+        console.error("Failed to fetch dashboard data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <ResponsiveLayout title="Home">
@@ -58,10 +88,10 @@ export function BuyerDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Namaste 👋</p>
-            <h2 className="text-xl font-semibold">Rajesh</h2>
+            <h2 className="text-xl font-semibold">{user?.name || "Buyer"}</h2>
             <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">
               <MapPin className="w-3 h-3" />
-              Nashik Mandi, MH
+              {user?.city || "Unknown City"}, {user?.state}
             </div>
           </div>
           <Button size="icon" variant="outline" className="rounded-full">
@@ -93,28 +123,28 @@ export function BuyerDashboard() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {marketPrices.map((item) => (
+            {marketPrices.map((item, i) => (
               <Card
-                key={item.name}
+                key={i}
                 className="rounded-2xl shadow-sm hover:shadow-md transition"
               >
                 <CardContent className="p-4 space-y-2">
-                  <div className="text-2xl">{item.emoji}</div>
-                  <p className="text-sm text-muted-foreground">{item.name}</p>
+                  <div className="text-2xl">{item.emoji || "📦"}</div>
+                  <p className="text-sm text-muted-foreground">{item.name || item.crop}</p>
                   <p className="text-xl font-bold">{item.price}</p>
 
                   <div
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${item.up
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${item.up || (item.trend === 'up')
                       ? "bg-green-100 text-green-700"
                       : "bg-red-100 text-red-700"
                       }`}
                   >
-                    {item.up ? (
+                    {(item.up || item.trend === 'up') ? (
                       <TrendingUp className="w-3 h-3" />
                     ) : (
                       <TrendingDown className="w-3 h-3" />
                     )}
-                    {item.change}
+                    {item.change || item.trendValue || (item.trend === 'up' ? '+5%' : '-2%')}
                   </div>
                 </CardContent>
               </Card>
@@ -133,44 +163,31 @@ export function BuyerDashboard() {
               </div>
             </div>
 
-            {/* ===== SUPPLY HEATMAP ===== */}
-            <Card className="rounded-2xl shadow-sm">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-semibold">Supply Heatmap</h3>
-                  <div className="flex gap-2">
-                    <Badge className="bg-red-100 text-red-700">High</Badge>
-                    <Badge className="bg-green-100 text-green-700">Low</Badge>
-                  </div>
-                </div>
+            {/* MAP CONTAINER */}
+            <div className="relative h-[420px] rounded-xl overflow-hidden border bg-muted/30 flex items-center justify-center">
+              {/* <SupplyHeatmap /> */}
+              <p className="text-muted-foreground">Map temporarily disabled</p>
 
-                {/* MAP CONTAINER */}
-                <div className="relative h-[420px] rounded-xl overflow-hidden border">
-                  <SupplyHeatmap />
+              {/* Overlay Info */}
+              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-xl shadow flex items-center gap-2">
+                <Truck className="w-4 h-4 text-emerald-600" />
+                <p className="text-sm font-medium">
+                  High supply detected in Satara region
+                </p>
+              </div>
 
-                  {/* Overlay Info */}
-                  <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-xl shadow flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-emerald-600" />
-                    <p className="text-sm font-medium">
-                      High supply detected in Satara region
-                    </p>
-                  </div>
-
-                  {/* CTA */}
-                  <div className="absolute top-4 right-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full bg-white/90 backdrop-blur"
-                      onClick={() => navigate("/buyer/logistics")}
-                    >
-                      Find Trucks
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
+              {/* CTA */}
+              <div className="absolute top-4 right-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full bg-white/90 backdrop-blur"
+                  onClick={() => navigate("/buyer/logistics")}
+                >
+                  Find Trucks
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -182,9 +199,9 @@ export function BuyerDashboard() {
           </div>
 
           <div className="space-y-4">
-            {smartPicks.map((pick) => (
+            {smartPicks.map((pick, i) => (
               <Card
-                key={pick.name}
+                key={i}
                 className="rounded-2xl shadow-sm hover:shadow-md transition"
               >
                 <CardContent className="p-4 flex justify-between items-center">
