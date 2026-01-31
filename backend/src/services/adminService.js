@@ -42,6 +42,20 @@ const getOverviewStats = async () => {
     };
 };
 
+const getAllDeals = async () => {
+    return await Deal.find()
+        .populate('buyer', 'name email phone city state')
+        .populate('seller', 'name email phone city state')
+        .populate('crop', 'name category')
+        .sort({ createdAt: -1 });
+};
+
+const getAllCrops = async () => {
+    return await Crop.find()
+        .populate('farmer', 'name email phone city state')
+        .sort({ createdAt: -1 });
+};
+
 // Moderation
 const deleteReview = async (id) => {
     return await Review.findByIdAndDelete(id);
@@ -57,6 +71,6 @@ const deleteDemand = async (id) => {
 
 module.exports = {
     getUsers, getUser, updateUserStatus, updateUserRole,
-    getOverviewStats,
+    getOverviewStats, getAllDeals, getAllCrops,
     deleteReview, deleteCrop, deleteDemand
 };

@@ -4,7 +4,7 @@ const register = async (req, res, next) => {
     try {
         const userPre = req.body;
         // Default to FARMER if not provided, though validation should catch it if strict
-        if (!userPre.role) userPre.role = 'FARMER';
+        if (!userPre.role) userPre.role = 'BUYER';
 
         const user = await authService.registerUser(userPre);
         res.status(201).json({

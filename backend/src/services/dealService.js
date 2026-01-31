@@ -36,8 +36,8 @@ const getMyDeals = async (userId) => {
         $or: [{ seller: userId }, { buyer: userId }]
     })
         .populate('crop')
-        .populate('buyer', 'name')
-        .populate('seller', 'name')
+        .populate('buyer', 'name email phone city state')
+        .populate('seller', 'name email phone city state')
         .sort({ createdAt: -1 });
 };
 

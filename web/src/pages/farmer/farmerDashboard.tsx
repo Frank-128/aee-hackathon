@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { farmerService } from "@/services/farmerService";
 import { marketService } from "@/services/marketService";
 import { dealService } from "@/services/dealService";
+import { aiService } from "@/services/aiService";
 import {
   Wallet,
   ArrowUpRight,
@@ -46,6 +47,7 @@ export default function CustomerDashboard() {
   const [recommendedPrices, setRecommendedPrices] = useState<any[]>([]);
   const [buyerDemands, setBuyerDemands] = useState<any[]>([]);
   const [deals, setDeals] = useState<any[]>([]);
+  const [aiInsights, setAiInsights] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -70,6 +72,13 @@ export default function CustomerDashboard() {
         const dealsData = dealsResponse.data;
         if (dealsData && Array.isArray(dealsData)) {
           setDeals(dealsData);
+        }
+
+        // Fetch AI insights
+        const insightsResponse = await aiService.getDashboardInsights();
+        const insightsData = insightsResponse.data;
+        if (insightsData && Array.isArray(insightsData)) {
+          setAiInsights(insightsData);
         }
 
       } catch (error) {
@@ -151,23 +160,39 @@ export default function CustomerDashboard() {
         </div>
 
         {/* ================= WEATHER / HIGHLIGHT ================= */}
-        <Card className="bg-gradient-to-br from-emerald-600 to-lime-500 text-white border-0 shadow-lg">
-          <CardContent className="p-6 flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-sm opacity-90 font-medium">Weather Today</p>
-              <h3 className="text-3xl font-bold mt-1">
-                28°C <span className="text-lg font-normal opacity-90">Sunny</span>
-              </h3>
-              <Badge className="mt-3 bg-white/20 text-white border-white/30 hover:bg-white/30">
-                🌾 Best for Wheat Harvest
-              </Badge>
-              <p className="text-xs opacity-75 mt-2">
-                Perfect conditions for harvesting today
-              </p>
-            </div>
-            <span className="text-6xl md:text-7xl">🌤️</span>
-          </CardContent>
-        </Card>
+        {/* ================= WEATHER / HIGHLIGHT ================= */}
+        {aiInsights.length > 0 ? (
+          <Card className="bg-gradient-to-br from-emerald-600 to-lime-500 text-white border-0 shadow-lg">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm opacity-90 font-medium">{aiInsights[0].title}</p>
+                <h3 className="text-3xl font-bold mt-1">
+                  {aiInsights[0].value} <span className="text-lg font-normal opacity-90">{aiInsights[0].trend === 'up' ? 'Rising' : aiInsights[0].trend === 'down' ? 'Falling' : 'Stable'}</span>
+                </h3>
+                <Badge className="mt-3 bg-white/20 text-white border-white/30 hover:bg-white/30">
+                  🌾 AI Insight
+                </Badge>
+                <p className="text-xs opacity-75 mt-2">
+                  {aiInsights[0].description}
+                </p>
+              </div>
+              <span className="text-6xl md:text-7xl">
+                {aiInsights[0].type === 'weather' ? '🌤️' : '📈'}
+              </span>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-gradient-to-br from-emerald-600 to-lime-500 text-white border-0 shadow-lg">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm opacity-90 font-medium">Weather & Insights</p>
+                <h3 className="text-3xl font-bold mt-1">
+                  Loading...
+                </h3>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* ================= AI RATES (Market Trends) ================= */}
         <section>
@@ -339,7 +364,7 @@ export default function CustomerDashboard() {
               icon={TrendingUp}
               title="Soil Analysis"
               description="AI insights"
-              to="/farmer/predictions" // Updated path suggestion
+              to="/farmer/insights" // Updated path suggestion
             />
             <ActionCard
               icon={Clock}

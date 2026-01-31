@@ -98,6 +98,7 @@ const farmerNavSections: NavSection[] = [
     title: "Farm Management",
     items: [
       { icon: Leaf, label: "Nearby Farmers", path: "/farmer/nearby-farmers" },
+      { icon: User, label: "Farm Profile", path: "/farmer/farm-profile" },
       { icon: Layers, label: "Inventory", path: "/farmer/inventory" },
       { icon: Truck, label: "Delivery", path: "/farmer/delivery" },
     ],
@@ -135,7 +136,7 @@ const buyerNavSections: NavSection[] = [
     items: [
       { icon: MessageCircle, label: "Messages", path: "/buyer/messages" },
       { icon: Star, label: "Reviews", path: "/buyer/reviews" },
-      { icon: Users, label: "Farmers", path: "/buyer/farmers" },
+      { icon: Users, label: "Farmers  Near Me", path: "/buyer/farmers" },
     ],
   },
 ];

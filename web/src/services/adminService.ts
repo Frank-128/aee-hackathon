@@ -10,5 +10,15 @@ export const adminService = {
     getAnalytics: async () => {
         const response = await api.get<ApiResponse<AdminAnalytics>>('/admin/analytics/overview');
         return response.data;
+    },
+
+    getDeals: async () => {
+        const response = await api.get<ApiResponse<any[]>>('/admin/deals');
+        return response.data;
+    },
+
+    getCrops: async () => {
+        const response = await api.get<ApiResponse<any[]>>('/admin/crops');
+        return response.data;
     }
 };

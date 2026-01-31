@@ -28,6 +28,20 @@ const getAnalytics = async (req, res, next) => {
     } catch (error) { res.status(500); next(error); }
 }
 
+const getAllDeals = async (req, res, next) => {
+    try {
+        const deals = await adminService.getAllDeals();
+        res.json({ success: true, data: deals });
+    } catch (error) { res.status(500); next(error); }
+}
+
+const getAllCrops = async (req, res, next) => {
+    try {
+        const crops = await adminService.getAllCrops();
+        res.json({ success: true, data: crops });
+    } catch (error) { res.status(500); next(error); }
+}
+
 const deleteItem = async (req, res, next) => {
     // Generic delete or specific based on route
     try {
@@ -40,5 +54,6 @@ const deleteItem = async (req, res, next) => {
 }
 
 module.exports = {
-    getAllUsers, getUserById, updateUserRole, getAnalytics, deleteItem
+    getAllUsers, getUserById, updateUserRole, getAnalytics,
+    getAllDeals, getAllCrops, deleteItem
 };

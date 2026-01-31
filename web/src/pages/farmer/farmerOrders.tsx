@@ -45,13 +45,14 @@ export function FarmerOrders() {
 
   const getStatusColor = (status: DealStatus) => {
     switch (status) {
-      case "completed":
+      case "DELIVERED":
         return "bg-emerald-100 text-emerald-700";
-      case "active":
+      case "CONFIRMED":
+      case "IN_TRANSIT":
         return "bg-blue-100 text-blue-700";
-      case "pending":
+      case "CREATED":
         return "bg-amber-100 text-amber-700";
-      case "cancelled":
+      case "CANCELLED":
         return "bg-red-100 text-red-700";
       default:
         return "bg-gray-100 text-gray-700";
@@ -74,7 +75,7 @@ export function FarmerOrders() {
 
         {/* Filters */}
         <div className="flex gap-2 flex-wrap">
-          {(["all", "pending", "active", "completed", "cancelled"] as const).map(
+          {(["all", "CREATED", "CONFIRMED", "IN_TRANSIT", "DELIVERED", "CANCELLED"] as const).map(
             (status) => (
               <Badge
                 key={status}
@@ -124,12 +125,12 @@ export function FarmerOrders() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 border-y border-border mb-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Buyer</p>
-                      <p className="font-semibold">{deal.buyerName || "Buyer"}</p>
+                      <p className="font-semibold">{(deal.buyer as any)?.name || deal.buyerName || "Buyer"}</p>
                     </div>
 
                     <div>
                       <p className="text-sm text-muted-foreground">Product</p>
-                      <p className="font-semibold">{deal.cropName}</p>
+                      <p className="font-semibold">{deal.cropName || (deal.crop as any)?.name}</p>
                     </div>
 
                     <div>
@@ -145,7 +146,7 @@ export function FarmerOrders() {
                     <div>
                       <p className="text-sm text-muted-foreground">Total Amount</p>
                       <p className="text-2xl font-bold text-emerald-600">
-                        ₹{deal.totalPrice.toLocaleString()}
+                        ₹{deal.totalAmount?.toLocaleString()}
                       </p>
                     </div>
 

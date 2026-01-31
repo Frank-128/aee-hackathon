@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   Phone,
@@ -34,8 +34,11 @@ type Message = {
 };
 
 /* ============ BUYER MESSAGES ============ */
+import { useLocation } from "react-router-dom";
+
 export default function BuyerMessages() {
-  const [selectedChat, setSelectedChat] = useState(null);
+  const location = useLocation();
+  const [selectedChat, setSelectedChat] = useState<any>(null);
   const [messageText, setMessageText] = useState("");
 
   const conversations = [
@@ -70,6 +73,31 @@ export default function BuyerMessages() {
       online: true,
     },
   ];
+
+  // Auto-select chat from navigation state
+  useEffect(() => {
+    if (location.state && location.state.farmerId) {
+      const { farmerId, farmerName } = location.state;
+      const existing = conversations.find(c => c.farmerId == farmerId || c.farmerName === farmerName);
+
+      if (existing) {
+        setSelectedChat(existing);
+      } else {
+        // Create a temporary mock conversation object if not found
+        // In a real app, this would fetch from backend or create a new channel
+        setSelectedChat({
+          id: Date.now(),
+          farmerId,
+          farmerName: farmerName || "Farmer",
+          farmerAvatar: (farmerName || "F").charAt(0).toUpperCase(),
+          lastMessage: "Start a conversation...",
+          timestamp: "Now",
+          unread: 0,
+          online: true
+        });
+      }
+    }
+  }, [location.state]);
 
   const messages = [
     {
@@ -113,9 +141,8 @@ export default function BuyerMessages() {
           {conversations.map((conv) => (
             <Card
               key={conv.id}
-              className={`card-hover cursor-pointer ${
-                selectedChat?.id === conv.id ? "border-emerald-500 border-2" : ""
-              }`}
+              className={`card-hover cursor-pointer ${selectedChat?.id === conv.id ? "border-emerald-500 border-2" : ""
+                }`}
               onClick={() => setSelectedChat(conv)}
             >
               <CardContent className="p-4">
@@ -187,24 +214,21 @@ export default function BuyerMessages() {
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`flex ${
-                          msg.sender === "buyer" ? "justify-end" : "justify-start"
-                        }`}
+                        className={`flex ${msg.sender === "buyer" ? "justify-end" : "justify-start"
+                          }`}
                       >
                         <div
-                          className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                            msg.sender === "buyer"
-                              ? "bg-emerald-600 text-white"
-                              : "bg-muted"
-                          }`}
+                          className={`max-w-[70%] rounded-2xl px-4 py-2 ${msg.sender === "buyer"
+                            ? "bg-emerald-600 text-white"
+                            : "bg-muted"
+                            }`}
                         >
                           <p className="text-sm">{msg.text}</p>
                           <p
-                            className={`text-xs mt-1 ${
-                              msg.sender === "buyer"
-                                ? "text-emerald-100"
-                                : "text-muted-foreground"
-                            }`}
+                            className={`text-xs mt-1 ${msg.sender === "buyer"
+                              ? "text-emerald-100"
+                              : "text-muted-foreground"
+                              }`}
                           >
                             {msg.timestamp}
                           </p>

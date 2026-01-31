@@ -34,53 +34,44 @@ type Invoice = {
 };
 
 /* ============ BUYER INVOICES ============ */
+import { dealService } from "@/services/dealService";
+import { useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
+
 export default function BuyerInvoices() {
   const [filterStatus, setFilterStatus] = useState("all");
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const invoices = [
-    {
-      id: "INV-2024-5021",
-      orderId: "ORD-5021",
-      farmer: "Kumar Farm Estate",
-      date: "2024-01-30",
-      dueDate: "2024-02-14",
-      amount: 17250,
-      tax: 863,
-      total: 18113,
-      status: "paid",
-      items: [
-        { name: "Premium Basmati Rice", quantity: "50kg", price: 345, total: 17250 },
-      ],
-    },
-    {
-      id: "INV-2024-5020",
-      orderId: "ORD-5020",
-      farmer: "Green Valley Farms",
-      date: "2024-01-29",
-      dueDate: "2024-02-13",
-      amount: 6000,
-      tax: 300,
-      total: 6300,
-      status: "paid",
-      items: [
-        { name: "Organic Tomatoes", quantity: "25kg", price: 240, total: 6000 },
-      ],
-    },
-    {
-      id: "INV-2024-5019",
-      orderId: "ORD-5019",
-      farmer: "Punjab Harvest",
-      date: "2024-01-28",
-      dueDate: "2024-02-12",
-      amount: 21500,
-      tax: 1075,
-      total: 22575,
-      status: "pending",
-      items: [
-        { name: "Fresh Wheat", quantity: "100 quintals", price: 2150, total: 21500 },
-      ],
-    },
-  ];
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const fetchInvoices = async () => {
+    try {
+      const res = await dealService.getMyDeals();
+      const deals = res.data || [];
+      const invList = deals.map((deal: any, index: number) => ({
+        id: `INV-${new Date().getFullYear()}-${deal._id.slice(-4).toUpperCase()}`,
+        orderId: `ORD-${deal._id.slice(-4).toUpperCase()}`,
+        farmer: deal.farmerName || "Unknown Farmer",
+        date: new Date(deal.createdAt).toLocaleDateString(),
+        dueDate: new Date(new Date(deal.createdAt).setDate(new Date(deal.createdAt).getDate() + 30)).toLocaleDateString(),
+        amount: deal.totalAmount,
+        tax: deal.totalAmount * 0.05,
+        total: deal.totalAmount * 1.05,
+        status: (deal.status === 'completed' ? 'paid' : deal.status === 'pending' ? 'pending' : 'overdue') as Invoice['status'],
+        items: [
+          { name: deal.cropName || deal.crop?.name, quantity: `${deal.quantity} ${deal.unit}`, price: deal.pricePerUnit, total: deal.totalAmount }
+        ]
+      }));
+      setInvoices(invList);
+    } catch (e) {
+      console.error("Failed to fetch invoices");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredInvoices =
     filterStatus === "all"
@@ -109,19 +100,23 @@ export default function BuyerInvoices() {
           <Card className="card-hover">
             <CardContent className="p-6 bg-emerald-50">
               <p className="text-sm text-muted-foreground mb-1">Total Paid</p>
-              <p className="text-3xl font-bold text-emerald-600">₹24.4K</p>
+              <p className="text-3xl font-bold text-emerald-600">
+                ₹{(invoices.filter(i => i.status === 'paid').reduce((acc, curr) => acc + curr.total, 0) / 1000).toFixed(1)}K
+              </p>
             </CardContent>
           </Card>
           <Card className="card-hover">
             <CardContent className="p-6 bg-amber-50">
               <p className="text-sm text-muted-foreground mb-1">Pending</p>
-              <p className="text-3xl font-bold text-amber-600">₹22.6K</p>
+              <p className="text-3xl font-bold text-amber-600">
+                ₹{(invoices.filter(i => i.status === 'pending').reduce((acc, curr) => acc + curr.total, 0) / 1000).toFixed(1)}K
+              </p>
             </CardContent>
           </Card>
           <Card className="card-hover">
             <CardContent className="p-6 bg-blue-50">
               <p className="text-sm text-muted-foreground mb-1">Total Invoices</p>
-              <p className="text-3xl font-bold">3</p>
+              <p className="text-3xl font-bold">{invoices.length}</p>
             </CardContent>
           </Card>
         </div>

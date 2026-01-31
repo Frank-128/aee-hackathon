@@ -39,20 +39,50 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { adminService } from "@/services/adminService";
+import { toast } from "@/hooks/use-toast";
 
 /* ============ ADMIN DASHBOARD ============ */
 export function AdminDashboard() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalFarmers: 0,
+    totalBuyers: 0,
+    activeListings: 0,
+    totalOrders: 0,
+    revenue: 0,
+    pendingVerifications: 0,
+    activeDisputes: 0,
+    successRate: 0,
+  });
 
-  const stats = {
-    totalFarmers: 2847,
-    totalBuyers: 1923,
-    activeListings: 1456,
-    totalOrders: 8934,
-    revenue: 45670000,
-    pendingVerifications: 34,
-    activeDisputes: 8,
-    successRate: 94.8,
+  React.useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await adminService.getAnalytics();
+      const data = response.data;
+      if (data) {
+        setStats({
+          totalFarmers: data.totalFarmers || 0,
+          totalBuyers: data.totalBuyers || 0,
+          activeListings: 0, // Not in API yet
+          totalOrders: data.totalDeals || 0,
+          revenue: data.totalRevenue || 0,
+          pendingVerifications: 0,
+          activeDisputes: 0,
+          successRate: 98,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load admin stats", error);
+      toast({ title: "Error", description: "Failed to load dashboard stats", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const quickStats = [
@@ -235,13 +265,12 @@ export function AdminDashboard() {
                 className="flex items-start gap-4 p-4 border border-border rounded-lg"
               >
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    activity.status === "success"
-                      ? "bg-emerald-100"
-                      : activity.status === "warning"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.status === "success"
+                    ? "bg-emerald-100"
+                    : activity.status === "warning"
                       ? "bg-amber-100"
                       : "bg-blue-100"
-                  }`}
+                    }`}
                 >
                   {activity.status === "success" ? (
                     <CheckCircle className="w-5 h-5 text-emerald-600" />
@@ -309,10 +338,16 @@ export function AdminDashboard() {
 export function AdminAnalytics() {
   const [timeRange, setTimeRange] = useState("7d");
 
+  /*
   const analyticsData = {
+     ...
+  };
+  */
+
+  const [analyticsData, setAnalyticsData] = useState({
     revenue: {
-      total: 45670000,
-      growth: 12.5,
+      total: 0,
+      growth: 12.5, // Mock
       chartData: [
         { day: "Mon", value: 520000 },
         { day: "Tue", value: 680000 },
@@ -324,14 +359,14 @@ export function AdminAnalytics() {
       ],
     },
     orders: {
-      total: 8934,
-      completed: 8467,
-      pending: 389,
-      cancelled: 78,
+      total: 0,
+      completed: 0,
+      pending: 0,
+      cancelled: 0,
     },
     userGrowth: {
-      farmers: { total: 2847, newThisWeek: 45 },
-      buyers: { total: 1923, newThisWeek: 32 },
+      farmers: { total: 0, newThisWeek: 45 },
+      buyers: { total: 0, newThisWeek: 32 },
     },
     topProducts: [
       { name: "Basmati Rice", quantity: "12,500 kg", revenue: 8540000 },
@@ -345,7 +380,35 @@ export function AdminAnalytics() {
       { region: "Uttar Pradesh", orders: 1670, revenue: 8560000 },
       { region: "Maharashtra", orders: 1450, revenue: 7340000 },
     ],
-  };
+  });
+
+  React.useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await adminService.getAnalytics();
+        const data = response.data;
+        if (data) {
+          setAnalyticsData(prev => ({
+            ...prev,
+            revenue: { ...prev.revenue, total: data.totalRevenue || 0 },
+            orders: {
+              total: data.totalDeals || 0,
+              completed: data.completedDeals || 0,
+              pending: data.activeDeals || 0, // Assuming active matches pending roughly
+              cancelled: 0 // Mock
+            },
+            userGrowth: {
+              farmers: { ...prev.userGrowth.farmers, total: data.totalFarmers || 0 },
+              buyers: { ...prev.userGrowth.buyers, total: data.totalBuyers || 0 }
+            }
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch analytics", error);
+      }
+    };
+    fetchAnalytics();
+  }, []);
 
   return (
     <ResponsiveLayout title="Analytics">
@@ -513,47 +576,44 @@ export function AdminFarmers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  /*
   const farmers = [
-    {
-      id: 1,
-      name: "Rajesh Kumar",
-      location: "Karnal, Haryana",
-      phone: "+91 98765 43210",
-      email: "rajesh.kumar@email.com",
-      status: "verified",
-      rating: 4.8,
-      totalListings: 12,
-      totalSales: 2340000,
-      joinedDate: "2023-05-12",
-      crops: ["Rice", "Wheat", "Corn"],
-    },
-    {
-      id: 2,
-      name: "Suresh Patel",
-      location: "Panipat, Haryana",
-      phone: "+91 98765 43211",
-      email: "suresh.patel@email.com",
-      status: "verified",
-      rating: 4.6,
-      totalListings: 8,
-      totalSales: 1890000,
-      joinedDate: "2023-06-20",
-      crops: ["Tomatoes", "Onions", "Potatoes"],
-    },
-    {
-      id: 3,
-      name: "Amit Singh",
-      location: "Ludhiana, Punjab",
-      phone: "+91 98765 43212",
-      email: "amit.singh@email.com",
-      status: "pending",
-      rating: 0,
-      totalListings: 0,
-      totalSales: 0,
-      joinedDate: "2024-01-28",
-      crops: [],
-    },
+    ...
   ];
+  */
+
+  const [farmers, setFarmers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchFarmers();
+  }, []);
+
+  const fetchFarmers = async () => {
+    try {
+      const response = await adminService.getUsers();
+      const users = response.data || [];
+      const farmerList = users.filter((u: any) => u.role?.toUpperCase() === 'FARMER').map((u: any) => ({
+        id: u._id,
+        name: u.name,
+        location: u.city ? `${u.city}, ${u.state || ''}` : "Unknown Location",
+        phone: u.phone || "N/A",
+        email: u.email,
+        status: u.status || "active",
+        rating: 0, // Mock for now
+        totalListings: 0, // Mock
+        totalSales: 0, // Mock
+        joinedDate: new Date(u.createdAt).toLocaleDateString(),
+        crops: [], // Mock
+      }));
+      setFarmers(farmerList);
+    } catch (error) {
+      console.error("Failed to fetch farmers", error);
+      toast({ title: "Error", description: "Failed to load farmers", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Farmers Management">
@@ -592,25 +652,31 @@ export function AdminFarmers() {
           <Card className="card-hover">
             <CardContent className="p-6 bg-blue-50">
               <p className="text-sm text-muted-foreground mb-1">Total Farmers</p>
-              <p className="text-3xl font-bold">2,847</p>
+              <p className="text-3xl font-bold">{farmers.length}</p>
             </CardContent>
           </Card>
           <Card className="card-hover">
             <CardContent className="p-6 bg-emerald-50">
-              <p className="text-sm text-muted-foreground mb-1">Verified</p>
-              <p className="text-3xl font-bold text-emerald-600">2,689</p>
+              <p className="text-sm text-muted-foreground mb-1">Active</p>
+              <p className="text-3xl font-bold text-emerald-600">
+                {farmers.filter(f => f.status === 'active' || f.status === 'verified').length}
+              </p>
             </CardContent>
           </Card>
           <Card className="card-hover">
             <CardContent className="p-6 bg-amber-50">
               <p className="text-sm text-muted-foreground mb-1">Pending</p>
-              <p className="text-3xl font-bold text-amber-600">124</p>
+              <p className="text-3xl font-bold text-amber-600">
+                {farmers.filter(f => f.status === 'pending').length}
+              </p>
             </CardContent>
           </Card>
           <Card className="card-hover">
             <CardContent className="p-6 bg-red-50">
               <p className="text-sm text-muted-foreground mb-1">Suspended</p>
-              <p className="text-3xl font-bold text-red-600">34</p>
+              <p className="text-3xl font-bold text-red-600">
+                {farmers.filter(f => f.status === 'suspended').length}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -653,8 +719,8 @@ export function AdminFarmers() {
                       farmer.status === "verified"
                         ? "status-success"
                         : farmer.status === "pending"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-red-100 text-red-700"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-red-100 text-red-700"
                     }
                   >
                     {farmer.status.charAt(0).toUpperCase() + farmer.status.slice(1)}
@@ -735,44 +801,43 @@ export function AdminFarmers() {
 export function AdminBuyers() {
   const [searchTerm, setSearchTerm] = useState("");
 
+  /*
   const buyers = [
-    {
-      id: 1,
-      name: "Kumar Traders",
-      type: "Business",
-      location: "Delhi",
-      phone: "+91 98765 43220",
-      email: "kumar.traders@email.com",
-      status: "active",
-      totalOrders: 145,
-      totalSpent: 5670000,
-      joinedDate: "2023-03-15",
-    },
-    {
-      id: 2,
-      name: "Green Valley Stores",
-      type: "Business",
-      location: "Mumbai",
-      phone: "+91 98765 43221",
-      email: "greenvalley@email.com",
-      status: "active",
-      totalOrders: 98,
-      totalSpent: 3450000,
-      joinedDate: "2023-07-22",
-    },
-    {
-      id: 3,
-      name: "Raj Sharma",
-      type: "Individual",
-      location: "Bangalore",
-      phone: "+91 98765 43222",
-      email: "raj.sharma@email.com",
-      status: "active",
-      totalOrders: 23,
-      totalSpent: 890000,
-      joinedDate: "2023-11-05",
-    },
+    ...
   ];
+  */
+
+  const [buyers, setBuyers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchBuyers();
+  }, []);
+
+  const fetchBuyers = async () => {
+    try {
+      const response = await adminService.getUsers();
+      const users = response.data || [];
+      const buyerList = users.filter((u: any) => u.role?.toUpperCase() === 'BUYER').map((u: any) => ({
+        id: u._id,
+        name: u.name,
+        type: "Business", // Mock
+        location: u.city ? `${u.city}` : "Unknown",
+        phone: u.phone || "N/A",
+        email: u.email,
+        status: u.status || "active",
+        totalOrders: 0, // Mock
+        totalSpent: 0, // Mock
+        joinedDate: new Date(u.createdAt).toLocaleDateString(),
+      }));
+      setBuyers(buyerList);
+    } catch (error) {
+      console.error("Failed to fetch buyers", error);
+      toast({ title: "Error", description: "Failed to load buyers", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Buyers Management">
@@ -789,23 +854,28 @@ export function AdminBuyers() {
         </div>
 
         {/* Stats */}
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="card-hover">
             <CardContent className="p-6 bg-blue-50">
               <p className="text-sm text-muted-foreground mb-1">Total Buyers</p>
-              <p className="text-3xl font-bold">1,923</p>
+              <p className="text-3xl font-bold">{buyers.length}</p>
             </CardContent>
           </Card>
           <Card className="card-hover">
             <CardContent className="p-6 bg-emerald-50">
-              <p className="text-sm text-muted-foreground mb-1">Business</p>
-              <p className="text-3xl font-bold text-emerald-600">1,245</p>
+              <p className="text-sm text-muted-foreground mb-1">Active</p>
+              <p className="text-3xl font-bold text-emerald-600">
+                {buyers.filter(b => b.status === 'active').length}
+              </p>
             </CardContent>
           </Card>
           <Card className="card-hover">
             <CardContent className="p-6 bg-purple-50">
-              <p className="text-sm text-muted-foreground mb-1">Individual</p>
-              <p className="text-3xl font-bold text-purple-600">678</p>
+              <p className="text-sm text-muted-foreground mb-1">Inactive</p>
+              <p className="text-3xl font-bold text-purple-600">
+                {buyers.filter(b => b.status !== 'active').length}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -882,40 +952,48 @@ export function AdminBuyers() {
 
 /* ============ ADMIN VERIFICATIONS ============ */
 export function AdminVerifications() {
+  /*
   const verifications = [
-    {
-      id: 1,
-      farmerName: "Amit Singh",
-      location: "Ludhiana, Punjab",
-      phone: "+91 98765 43212",
-      email: "amit.singh@email.com",
-      submittedDate: "2024-01-28",
-      documents: {
-        aadhar: "uploaded",
-        landDocs: "uploaded",
-        bankDetails: "uploaded",
-      },
-      landArea: "5 acres",
-      cropTypes: ["Wheat", "Rice"],
-      status: "pending",
-    },
-    {
-      id: 2,
-      farmerName: "Priya Devi",
-      location: "Meerut, UP",
-      phone: "+91 98765 43213",
-      email: "priya.devi@email.com",
-      submittedDate: "2024-01-29",
-      documents: {
-        aadhar: "uploaded",
-        landDocs: "pending",
-        bankDetails: "uploaded",
-      },
-      landArea: "3 acres",
-      cropTypes: ["Vegetables"],
-      status: "pending",
-    },
+    // Mock data removed
   ];
+  */
+
+  const [verifications, setVerifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchVerifications();
+  }, []);
+
+  const fetchVerifications = async () => {
+    try {
+      const response = await adminService.getUsers();
+      const users = response.data || [];
+      const pendingUsers = users.filter((u: any) => u.status === 'pending');
+      const verificationList = pendingUsers.map((u: any) => ({
+        id: u._id,
+        farmerName: u.name,
+        location: u.city ? `${u.city}, ${u.state || ''}` : "Unknown Location",
+        phone: u.phone || "N/A",
+        email: u.email,
+        submittedDate: new Date(u.createdAt).toLocaleDateString(),
+        documents: {
+          aadhar: "uploaded", // Mock
+          landDocs: "uploaded", // Mock
+          bankDetails: "uploaded", // Mock
+        },
+        landArea: "N/A", // Mock or add to schema
+        cropTypes: [], // Mock or add to schema
+        status: "pending",
+        role: u.role
+      }));
+      setVerifications(verificationList);
+    } catch (error) {
+      console.error("Failed to fetch verifications", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Farmer Verifications">
@@ -1063,44 +1141,42 @@ export function AdminVerifications() {
 export function AdminProducts() {
   const [searchTerm, setSearchTerm] = useState("");
 
+  /*
   const products = [
-    {
-      id: 1,
-      name: "Premium Basmati Rice",
-      category: "Grains",
-      farmer: "Rajesh Kumar",
-      quantity: "500 kg",
-      price: 3450,
-      unit: "quintal",
-      status: "active",
-      rating: 4.8,
-      sales: 245,
-    },
-    {
-      id: 2,
-      name: "Organic Tomatoes",
-      category: "Vegetables",
-      farmer: "Suresh Patel",
-      quantity: "1200 kg",
-      price: 24,
-      unit: "kg",
-      status: "active",
-      rating: 4.6,
-      sales: 189,
-    },
-    {
-      id: 3,
-      name: "Fresh Wheat",
-      category: "Grains",
-      farmer: "Amit Singh",
-      quantity: "2000 kg",
-      price: 2150,
-      unit: "quintal",
-      status: "pending",
-      rating: 0,
-      sales: 0,
-    },
+    // Mock data removed
   ];
+  */
+
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await adminService.getCrops();
+      const crops = response.data || [];
+      const productList = crops.map((crop: any) => ({
+        id: crop._id,
+        name: crop.name,
+        category: crop.category,
+        farmer: crop.farmer?.name || "Unknown",
+        quantity: `${crop.quantity} ${crop.unit}`,
+        price: crop.pricePerUnit,
+        unit: crop.unit,
+        status: crop.quantity > 0 ? "active" : "out-of-stock", // Simple logic for now
+        rating: 0, // Mock
+        sales: 0, // Mock
+      }));
+      setProducts(productList);
+    } catch (error) {
+      console.error("Failed to fetch products", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Products Management">
@@ -1261,41 +1337,45 @@ export function AdminListings() {
 export function AdminOrders() {
   const [filterStatus, setFilterStatus] = useState("all");
 
+  /*
   const orders = [
-    {
-      id: "ORD-8934",
-      buyer: "Kumar Traders",
-      farmer: "Rajesh Kumar",
-      product: "Basmati Rice",
-      quantity: "500 kg",
-      amount: 172500,
-      status: "delivered",
-      date: "2024-01-30",
-      paymentStatus: "completed",
-    },
-    {
-      id: "ORD-8933",
-      buyer: "Green Valley Stores",
-      farmer: "Suresh Patel",
-      product: "Tomatoes",
-      quantity: "250 kg",
-      amount: 6000,
-      status: "in-transit",
-      date: "2024-01-30",
-      paymentStatus: "completed",
-    },
-    {
-      id: "ORD-8932",
-      buyer: "Raj Sharma",
-      farmer: "Amit Singh",
-      product: "Wheat",
-      quantity: "100 quintals",
-      amount: 215000,
-      status: "processing",
-      date: "2024-01-29",
-      paymentStatus: "pending",
-    },
+    // Mock data removed
   ];
+  */
+
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const response = await adminService.getDeals();
+      const deals = response.data || [];
+      const orderList = deals.map((deal: any) => ({
+        id: `ORD-${deal._id.slice(-4).toUpperCase()}`,
+        buyer: deal.buyer?.name || "Unknown Buyer",
+        farmer: deal.seller?.name || "Unknown Farmer",
+        product: deal.crop?.name || "Unknown Product",
+        quantity: `${deal.quantity} ${deal.unit || 'units'}`,
+        amount: deal.totalAmount,
+        status: deal.status.toLowerCase(), // active, completed, cancelled -> match badge logic
+        date: new Date(deal.createdAt).toLocaleDateString(),
+        paymentStatus: deal.status === 'DELIVERED' ? "completed" : "pending", // Simplified logic
+      }));
+      setOrders(orderList);
+    } catch (error) {
+      console.error("Failed to fetch orders", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredOrders = filterStatus === 'all'
+    ? orders
+    : orders.filter(o => o.status === filterStatus);
 
   return (
     <ResponsiveLayout title="Orders Management">
@@ -1346,7 +1426,7 @@ export function AdminOrders() {
 
         {/* Orders List */}
         <div className="space-y-4">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <Card key={order.id} className="card-hover">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
@@ -1359,8 +1439,8 @@ export function AdminOrders() {
                       order.status === "delivered"
                         ? "status-success"
                         : order.status === "in-transit"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-amber-100 text-amber-700"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-amber-100 text-amber-700"
                     }
                   >
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -1425,41 +1505,42 @@ export function AdminOrders() {
 
 /* ============ ADMIN PAYMENTS ============ */
 export function AdminPayments() {
+  /*
   const payments = [
-    {
-      id: "PAY-5621",
-      orderId: "ORD-8934",
-      farmer: "Rajesh Kumar",
-      buyer: "Kumar Traders",
-      amount: 172500,
-      status: "completed",
-      method: "UPI",
-      date: "2024-01-30",
-      time: "14:30",
-    },
-    {
-      id: "PAY-5620",
-      orderId: "ORD-8933",
-      farmer: "Suresh Patel",
-      buyer: "Green Valley Stores",
-      amount: 6000,
-      status: "completed",
-      method: "Bank Transfer",
-      date: "2024-01-30",
-      time: "12:15",
-    },
-    {
-      id: "PAY-5619",
-      orderId: "ORD-8932",
-      farmer: "Amit Singh",
-      buyer: "Raj Sharma",
-      amount: 215000,
-      status: "pending",
-      method: "Bank Transfer",
-      date: "2024-01-29",
-      time: "16:45",
-    },
+    // Mock data removed
   ];
+  */
+
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const fetchPayments = async () => {
+    try {
+      const response = await adminService.getDeals();
+      const deals = response.data || [];
+      // Filter only delivered/paid deals or show all with status
+      const paymentList = deals.map((deal: any) => ({
+        id: `PAY-${deal._id.slice(-4).toUpperCase()}`,
+        orderId: `ORD-${deal._id.slice(-4).toUpperCase()}`,
+        farmer: deal.seller?.name || "Unknown",
+        buyer: deal.buyer?.name || "Unknown",
+        amount: deal.totalAmount,
+        status: deal.status === 'DELIVERED' ? "completed" : "pending",
+        method: "Online", // Mock
+        date: new Date(deal.createdAt).toLocaleDateString(),
+        time: new Date(deal.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      }));
+      setPayments(paymentList);
+    } catch (error) {
+      console.error("Failed to fetch payments", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Payments Management">
@@ -1514,8 +1595,8 @@ export function AdminPayments() {
                       payment.status === "completed"
                         ? "status-success"
                         : payment.status === "pending"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-red-100 text-red-700"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-red-100 text-red-700"
                     }
                   >
                     {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
@@ -1563,41 +1644,41 @@ export function AdminPayments() {
 
 /* ============ ADMIN INVOICES ============ */
 export function AdminInvoices() {
+  /*
   const invoices = [
-    {
-      id: "INV-2024-001",
-      orderId: "ORD-8934",
-      buyer: "Kumar Traders",
-      amount: 172500,
-      tax: 8625,
-      total: 181125,
-      status: "paid",
-      issueDate: "2024-01-30",
-      dueDate: "2024-02-14",
-    },
-    {
-      id: "INV-2024-002",
-      orderId: "ORD-8933",
-      buyer: "Green Valley Stores",
-      amount: 6000,
-      tax: 300,
-      total: 6300,
-      status: "paid",
-      issueDate: "2024-01-30",
-      dueDate: "2024-02-14",
-    },
-    {
-      id: "INV-2024-003",
-      orderId: "ORD-8932",
-      buyer: "Raj Sharma",
-      amount: 215000,
-      tax: 10750,
-      total: 225750,
-      status: "pending",
-      issueDate: "2024-01-29",
-      dueDate: "2024-02-13",
-    },
+    // Mock data removed
   ];
+  */
+
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const fetchInvoices = async () => {
+    try {
+      const response = await adminService.getDeals();
+      const deals = response.data || [];
+      const invoiceList = deals.map((deal: any) => ({
+        id: `INV-${new Date().getFullYear()}-${deal._id.slice(-4).toUpperCase()}`,
+        orderId: `ORD-${deal._id.slice(-4).toUpperCase()}`,
+        buyer: deal.buyer?.name || "Unknown",
+        amount: deal.totalAmount,
+        tax: deal.totalAmount * 0.05,
+        total: deal.totalAmount * 1.05,
+        status: deal.status === 'DELIVERED' ? "paid" : "pending",
+        issueDate: new Date(deal.createdAt).toLocaleDateString(),
+        dueDate: new Date(new Date(deal.createdAt).setDate(new Date(deal.createdAt).getDate() + 30)).toLocaleDateString(),
+      }));
+      setInvoices(invoiceList);
+    } catch (error) {
+      console.error("Failed to fetch invoices", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Invoices Management">
@@ -1771,8 +1852,8 @@ export function AdminDisputes() {
                   dispute.priority === "high"
                     ? "rgb(239 68 68)"
                     : dispute.priority === "medium"
-                    ? "rgb(245 158 11)"
-                    : "rgb(59 130 246)",
+                      ? "rgb(245 158 11)"
+                      : "rgb(59 130 246)",
               }}
             >
               <CardContent className="p-6">
@@ -1785,8 +1866,8 @@ export function AdminDisputes() {
                           dispute.priority === "high"
                             ? "bg-red-100 text-red-700"
                             : dispute.priority === "medium"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-blue-100 text-blue-700"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-blue-100 text-blue-700"
                         }
                       >
                         {dispute.priority.charAt(0).toUpperCase() +

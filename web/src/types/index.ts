@@ -83,15 +83,23 @@ export interface BuyerProfile {
     _id: string;
     name: string;
     email: string;
+
     phone?: string;
     avatar?: string;
-    address?: Address;
-    city?: string;
-    state?: string;
+
     businessName?: string;
     businessType?: string;
+
+    location: {
+        city?: string;
+        state?: string;
+        district?: string;
+        address?: string;
+    };
+
     createdAt?: string;
 }
+
 
 export interface Demand {
     _id: string;
@@ -107,18 +115,18 @@ export interface Demand {
 }
 
 // ==================== Deal & Order Types ====================
-export type DealStatus = 'pending' | 'active' | 'completed' | 'cancelled';
+export type DealStatus = 'CREATED' | 'CONFIRMED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
 
 export interface Deal {
     _id: string;
-    farmerId: string;
-    buyerId: string;
-    cropId?: string;
+    seller: string | User;
+    buyer: string | User;
+    crop: string | Crop;
     cropName: string;
     quantity: number;
     unit: string;
     pricePerUnit: number;
-    totalPrice: number;
+    totalAmount: number;
     status: DealStatus;
     createdAt: string;
     updatedAt?: string;

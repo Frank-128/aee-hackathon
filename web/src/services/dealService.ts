@@ -15,5 +15,10 @@ export const dealService = {
     confirmDeal: async (dealId: string) => {
         const response = await api.post<ApiResponse<Deal>>(`/deals/confirm/${dealId}`);
         return response.data;
+    },
+
+    cancelDeal: async (dealId: string) => {
+        const response = await api.post<ApiResponse<Deal>>(`/deals/cancel/${dealId}`);
+        return response.data;
     }
 };

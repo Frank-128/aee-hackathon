@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { farmerService } from "@/services/farmerService";
+import { supportService } from "@/services/supportService";
+import { toast } from "@/hooks/use-toast";
 import {
   Package,
   ShoppingCart,
@@ -27,6 +30,7 @@ import {
   Eye,
   Download,
   Send,
+  Loader2,
 } from "lucide-react";
 import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +45,7 @@ export function FarmerProducts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "sold-out">("all");
 
+  /* 
   const products = [
     {
       id: 1,
@@ -54,31 +59,54 @@ export function FarmerProducts() {
       rating: 4.8,
       image: "🌾",
     },
-    {
-      id: 2,
-      name: "Organic Tomatoes",
-      category: "Vegetables",
-      quantity: 0,
-      unit: "kg",
-      price: 24,
-      status: "sold-out",
-      orders: 28,
-      rating: 4.5,
-      image: "🍅",
-    },
-    {
-      id: 3,
-      name: "Fresh Wheat",
-      category: "Grains",
-      quantity: 800,
-      unit: "quintal",
-      price: 2150,
-      status: "active",
-      orders: 8,
-      rating: 4.6,
-      image: "🌾",
-    },
+    ...
   ];
+  */
+
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await farmerService.getCrops();
+      // Ensure we handle the response correctly based on API structure
+      const data = response.data || response;
+      // Map API data to UI format if needed, or use directly if matches
+      // Assumes API returns array of crops with similar fields
+      const formatted = Array.isArray(data) ? data.map((crop: any) => ({
+        id: crop._id,
+        name: crop.name,
+        category: crop.type || "General",
+        quantity: crop.quantity,
+        unit: crop.unit,
+        price: crop.pricePerUnit,
+        status: "active", // Default to active as API might not have status
+        orders: 0, // Mock for now
+        rating: 4.5, // Mock for now
+        image: "🌾", // Mock image based on name later
+      })) : [];
+      setProducts(formatted);
+    } catch (error) {
+      console.error("Failed to fetch products", error);
+      toast({ title: "Error", description: "Failed to load products", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await farmerService.deleteCrop(id);
+      toast({ title: "Success", description: "Product deleted" });
+      fetchProducts();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete product", variant: "destructive" });
+    }
+  };
 
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -128,7 +156,7 @@ export function FarmerProducts() {
                 <div className="text-4xl mb-4">{product.image}</div>
                 <h3 className="font-bold text-lg mb-2">{product.name}</h3>
                 <p className="text-sm text-muted-foreground mb-3">{product.category}</p>
-                
+
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-2xl font-bold text-emerald-600">
                     ₹{product.price.toLocaleString()}
@@ -160,7 +188,7 @@ export function FarmerProducts() {
                   <Button variant="outline" size="sm" className="flex-1">
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => handleDelete(product.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -176,44 +204,70 @@ export function FarmerProducts() {
 
 
 /* ============ EARNINGS PAGE ============ */
-export function FarmerEarnings() {
-  const earningsData = {
-    thisMonth: 125000,
-    lastMonth: 98500,
-    thisYear: 1450000,
-    totalEarnings: 2850000,
-  };
+import { dealService } from "@/services/dealService";
 
-  const transactions = [
-    {
-      id: 1,
-      date: "2024-01-15",
-      description: "Sale: Basmati Rice",
-      amount: 34500,
-      status: "completed",
-    },
-    {
-      id: 2,
-      date: "2024-01-14",
-      description: "Sale: Tomatoes",
-      amount: 14400,
-      status: "completed",
-    },
-    {
-      id: 3,
-      date: "2024-01-13",
-      description: "Sale: Wheat",
-      amount: 17200,
-      status: "completed",
-    },
-    {
-      id: 4,
-      date: "2024-01-12",
-      description: "Withdrawal",
-      amount: -50000,
-      status: "completed",
-    },
-  ];
+export function FarmerEarnings() {
+  const [earningsData, setEarningsData] = useState({
+    thisMonth: 0,
+    lastMonth: 0,
+    thisYear: 0,
+    totalEarnings: 0,
+  });
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEarnings();
+  }, []);
+
+  const fetchEarnings = async () => {
+    try {
+      const res = await dealService.getMyDeals();
+      const deals = res.data || [];
+
+      // Filter for completed/sold deals
+      const completedDeals = Array.isArray(deals) ? deals.filter((d: any) => d.status === 'completed' || d.status === 'accepted') : [];
+
+      let total = 0;
+      let thisMonth = 0;
+      let lastMonth = 0; // Mock calculation logic for demo
+      let thisYear = 0;
+      const now = new Date();
+
+      const txList = completedDeals.map((deal: any) => {
+        const date = new Date(deal.createdAt);
+        const amount = deal.totalPrice || deal.totalAmount || 0;
+        total += amount;
+
+        if (date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) {
+          thisMonth += amount;
+        }
+        if (date.getFullYear() === now.getFullYear()) {
+          thisYear += amount;
+        }
+
+        return {
+          id: deal._id,
+          date: date.toLocaleDateString(),
+          description: `Sale: ${deal.cropName || deal.crop?.name}`,
+          amount: amount,
+          status: deal.status
+        };
+      });
+
+      setEarningsData({
+        thisMonth,
+        lastMonth: thisMonth * 0.8, // Mock previous month for trend
+        thisYear,
+        totalEarnings: total
+      });
+      setTransactions(txList.reverse().slice(0, 10)); // Recent 10
+    } catch (error) {
+      console.error("Failed to fetch earnings", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Earnings">
@@ -223,29 +277,29 @@ export function FarmerEarnings() {
           <Card className="card-hover">
             <CardContent className="p-6">
               <p className="text-sm text-muted-foreground mb-2">This Month</p>
-              <p className="text-3xl font-bold text-emerald-600">₹{(earningsData.thisMonth / 1000).toFixed(0)}K</p>
-              <p className="text-xs text-emerald-600 mt-2">↑ 27% from last month</p>
+              <p className="text-3xl font-bold text-emerald-600">₹{(earningsData.thisMonth).toLocaleString()}</p>
+              <p className="text-xs text-emerald-600 mt-2">↑ 12% from last month</p>
             </CardContent>
           </Card>
 
           <Card className="card-hover">
             <CardContent className="p-6">
               <p className="text-sm text-muted-foreground mb-2">Last Month</p>
-              <p className="text-3xl font-bold">₹{(earningsData.lastMonth / 1000).toFixed(0)}K</p>
+              <p className="text-3xl font-bold">₹{(earningsData.lastMonth).toLocaleString()}</p>
             </CardContent>
           </Card>
 
           <Card className="card-hover">
             <CardContent className="p-6">
               <p className="text-sm text-muted-foreground mb-2">This Year</p>
-              <p className="text-3xl font-bold text-emerald-600">₹{(earningsData.thisYear / 100000).toFixed(1)}L</p>
+              <p className="text-3xl font-bold text-emerald-600">₹{(earningsData.thisYear).toLocaleString()}</p>
             </CardContent>
           </Card>
 
           <Card className="card-hover">
             <CardContent className="p-6">
               <p className="text-sm text-muted-foreground mb-2">All Time</p>
-              <p className="text-3xl font-bold">₹{(earningsData.totalEarnings / 100000).toFixed(1)}L</p>
+              <p className="text-3xl font-bold">₹{(earningsData.totalEarnings).toLocaleString()}</p>
             </CardContent>
           </Card>
         </div>
@@ -257,17 +311,17 @@ export function FarmerEarnings() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {transactions.map((tx) => (
+              {loading ? <p>Loading transactions...</p> : transactions.length > 0 ? transactions.map((tx) => (
                 <div key={tx.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
                   <div>
                     <p className="font-semibold text-sm">{tx.description}</p>
                     <p className="text-xs text-muted-foreground">{tx.date}</p>
                   </div>
-                  <p className={`font-bold ${tx.amount > 0 ? "text-emerald-600" : "text-red-600"}`}>
-                    {tx.amount > 0 ? "+" : ""}₹{Math.abs(tx.amount).toLocaleString()}
+                  <p className={`font-bold text-emerald-600`}>
+                    +₹{Math.abs(tx.amount).toLocaleString()}
                   </p>
                 </div>
-              ))}
+              )) : <p className="text-muted-foreground">No recent transactions</p>}
             </div>
           </CardContent>
         </Card>
@@ -284,17 +338,62 @@ export function FarmerEarnings() {
 
 /* ============ FARM PROFILE PAGE ============ */
 export function FarmerFarmProfile() {
+  /*
   const farmProfile = {
     name: "Kumar Farm Estate",
-    location: "Punjab, India",
-    area: 45,
-    areaUnit: "acres",
-    established: "2015",
-    crops: ["Rice", "Wheat", "Tomatoes", "Onions"],
-    certification: "Organic Certified",
-    members: 5,
-    description: "Premium organic farm producing high-quality crops for regional markets",
+    ...
   };
+  */
+
+  const { user } = useAuth();
+  const [farmData, setFarmData] = useState<any>({
+    name: user?.name ? `${user.name}'s Farm` : "My Farm",
+    location: user?.city ? `${user.city}, ${user.state || ""}` : "Location Not Set",
+    area: 0,
+    areaUnit: "acres",
+    established: new Date().getFullYear().toString(),
+    crops: [],
+    certification: "Verified Farmer", // placeholder
+    members: 1,
+    description: "No description provided.",
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [landRes, cropsRes] = await Promise.all([
+          farmerService.getLand(),
+          farmerService.getCrops()
+        ]);
+
+        const lands = landRes.data || [];
+        const crops = cropsRes.data || [];
+
+        const totalArea = Array.isArray(lands) ? lands.reduce((acc: number, land: any) => acc + (Number(land.area) || 0), 0) : 0;
+        // distinct crops
+        const distinctCrops = Array.isArray(crops) ? Array.from(new Set(crops.map((c: any) => c.name || c.cropName))) : [];
+
+        setFarmData(prev => ({
+          ...prev,
+          name: user?.name ? `${user.name}'s Farm` : prev.name,
+          location: user?.city ? `${user.city}, ${user.state || ''}` : (lands[0]?.location || prev.location),
+          area: totalArea,
+          crops: distinctCrops,
+          // established: user.createdAt ... ?
+        }));
+
+      } catch (error) {
+        console.error("Failed to fetch farm profile data", error);
+        // toast ...
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user) fetchData();
+  }, [user]);
+
+  const farmProfile = farmData; // compatibility alias
 
   return (
     <ResponsiveLayout title="Farm Profile">
@@ -357,11 +456,30 @@ export function FarmerFarmProfile() {
 
 /* ============ INVENTORY PAGE ============ */
 export function FarmerInventory() {
-  const inventory = [
-    { id: 1, item: "Basmati Rice", quantity: 500, unit: "kg", status: "In Stock", reorderLevel: 100 },
-    { id: 2, item: "Wheat", quantity: 50, unit: "quintal", status: "Low Stock", reorderLevel: 100 },
-    { id: 3, item: "Tomatoes", quantity: 0, unit: "kg", status: "Out of Stock", reorderLevel: 200 },
-  ];
+  const [inventory, setInventory] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const res = await farmerService.getCrops();
+        const data = res.data || [];
+        if (Array.isArray(data)) {
+          const formatted = data.map((crop: any) => ({
+            id: crop._id,
+            item: crop.name,
+            quantity: crop.quantity,
+            unit: crop.unit,
+            status: crop.quantity > 100 ? "In Stock" : crop.quantity > 0 ? "Low Stock" : "Out of Stock",
+            reorderLevel: 50 // Mock
+          }));
+          setInventory(formatted);
+        }
+      } catch (e) {
+        console.error("Failed inventory fetch");
+      }
+    }
+    fetchInventory();
+  }, []);
 
   return (
     <ResponsiveLayout title="Inventory">
@@ -372,7 +490,7 @@ export function FarmerInventory() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {inventory.map((item) => (
+              {inventory.length > 0 ? inventory.map((item) => (
                 <div key={item.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                   <div className="flex-1">
                     <p className="font-semibold">{item.item}</p>
@@ -384,13 +502,13 @@ export function FarmerInventory() {
                   </div>
                   <Badge className={
                     item.status === "In Stock" ? "status-success" :
-                    item.status === "Low Stock" ? "bg-amber-100 text-amber-700" :
-                    "bg-red-100 text-red-700"
+                      item.status === "Low Stock" ? "bg-amber-100 text-amber-700" :
+                        "bg-red-100 text-red-700"
                   }>
                     {item.status}
                   </Badge>
                 </div>
-              ))}
+              )) : <p className="text-muted-foreground text-center">No inventory items. Add crops to see them here.</p>}
             </div>
           </CardContent>
         </Card>
@@ -401,6 +519,36 @@ export function FarmerInventory() {
 
 /* ============ DELIVERY PAGE ============ */
 export function FarmerDelivery() {
+  const [quote, setQuote] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({ pickup: "", dropoff: "", weight: 0 });
+  const [activeDeliveries, setActiveDeliveries] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchDeliveries();
+  }, []);
+
+  const fetchDeliveries = async () => {
+    try {
+      const res = await dealService.getMyDeals();
+      const deals = res.data || [];
+      // Filter for active deliveries (accepted, in-transit, etc.)
+      // Assuming status 'accepted' implies processing/delivery started
+      const active = Array.isArray(deals) ? deals.filter((d: any) => ['accepted', 'shipped', 'in-transit'].includes(d.status)) : [];
+
+      const formatted = active.map((d: any) => ({
+        id: d._id,
+        order: `ORD-${d._id.slice(-4).toUpperCase()}`,
+        status: d.status,
+        location: d.buyerName || "Buyer Location", // Mock location if not in deal
+        expected: new Date(new Date(d.createdAt).setDate(new Date(d.createdAt).getDate() + 7)).toLocaleDateString() // Mock ETA
+      }));
+      setActiveDeliveries(formatted);
+    } catch (e) {
+      console.error("Failed to fetch deliveries");
+    }
+  };
+
   const deliverySettings = {
     deliveryZone: "Pan-India",
     standardDelivery: "5-7 days",
@@ -409,22 +557,17 @@ export function FarmerDelivery() {
     minOrderValue: 500,
   };
 
-  const activeDeliveries = [
-    {
-      id: 1,
-      order: "ORD-9021",
-      status: "In Transit",
-      location: "Delhi",
-      expected: "2024-01-17",
-    },
-    {
-      id: 2,
-      order: "ORD-9020",
-      status: "Dispatched",
-      location: "Mumbai",
-      expected: "2024-01-18",
-    },
-  ];
+  const handleGetQuote = async () => {
+    try {
+      setLoading(true);
+      const res = await supportService.getTransportQuote(formData);
+      setQuote(res.data || res);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to get quote", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Delivery Settings">
@@ -444,7 +587,27 @@ export function FarmerDelivery() {
                 </div>
               ))}
             </div>
-            <Button className="w-full" variant="outline">Edit Delivery Settings</Button>
+
+            <div className="pt-6 border-t">
+              <h3 className="font-bold mb-4">Request Logistics Quote</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <Input placeholder="Pickup Location" value={formData.pickup} onChange={e => setFormData({ ...formData, pickup: e.target.value })} />
+                <Input placeholder="Dropoff Location" value={formData.dropoff} onChange={e => setFormData({ ...formData, dropoff: e.target.value })} />
+                <Input type="number" placeholder="Weight (kg)" value={formData.weight || ''} onChange={e => setFormData({ ...formData, weight: Number(e.target.value) })} />
+              </div>
+              <Button onClick={handleGetQuote} disabled={loading}>
+                {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Truck className="w-4 h-4 mr-2" />}
+                Get Rate
+              </Button>
+
+              {quote && (
+                <div className="mt-4 p-4 bg-emerald-50 rounded-lg">
+                  <p className="font-bold text-lg text-emerald-700">Estimated Cost: ₹{quote.estimatedCost}</p>
+                  <p className="text-sm">Provider: {quote.provider} | Vehicle: {quote.vehicleType}</p>
+                  <Button className="mt-2" variant="outline" size="sm" onClick={() => toast({ title: "Booked", description: "Transport booking request sent" })}>Book Now</Button>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -454,7 +617,7 @@ export function FarmerDelivery() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {activeDeliveries.map((delivery) => (
+              {activeDeliveries.length > 0 ? activeDeliveries.map((delivery) => (
                 <div key={delivery.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                   <div>
                     <p className="font-semibold">{delivery.order}</p>
@@ -465,7 +628,7 @@ export function FarmerDelivery() {
                     <p className="text-xs text-muted-foreground mt-1">Est. {delivery.expected}</p>
                   </div>
                 </div>
-              ))}
+              )) : <p className="text-muted-foreground text-center">No active deliveries</p>}
             </div>
           </CardContent>
         </Card>
@@ -518,11 +681,10 @@ export function FarmerWeather() {
               {weatherAlerts.map((alert) => (
                 <div
                   key={alert.id}
-                  className={`p-4 rounded-lg border-l-4 ${
-                    alert.severity === "high"
-                      ? "border-l-red-600 bg-red-50"
-                      : "border-l-amber-600 bg-amber-50"
-                  }`}
+                  className={`p-4 rounded-lg border-l-4 ${alert.severity === "high"
+                    ? "border-l-red-600 bg-red-50"
+                    : "border-l-amber-600 bg-amber-50"
+                    }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <p className="font-semibold">{alert.title}</p>

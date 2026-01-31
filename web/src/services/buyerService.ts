@@ -8,14 +8,12 @@ import {
 } from '@/types';
 
 export const buyerService = {
-    getProfile: async () => {
-        const response = await api.get<ApiResponse<BuyerProfile>>('/buyers/profile');
-        return response.data;
+    getProfile() {
+        return api.get<ApiResponse<BuyerProfile>>("/buyer/profile");
     },
 
-    updateProfile: async (data: Partial<BuyerProfile>) => {
-        const response = await api.put<ApiResponse<BuyerProfile>>('/buyers/profile', data);
-        return response.data;
+    updateProfile(payload: BuyerProfile) {
+        return api.put<ApiResponse<BuyerProfile>>("/buyer/profile", payload);
     },
 
     postDemand: async (data: Omit<Demand, '_id' | 'buyerId' | 'createdAt'>) => {
@@ -25,6 +23,16 @@ export const buyerService = {
 
     getDemands: async () => {
         const response = await api.get<ApiResponse<Demand[]>>('/buyers/demands');
+        return response.data;
+    },
+
+    deleteDemand: async (demandId: string) => {
+        const response = await api.delete<ApiResponse<void>>(`/buyers/demand/${demandId}`);
+        return response.data;
+    },
+
+    updateDemand: async (demandId: string, data: Partial<Demand>) => {
+        const response = await api.put<ApiResponse<Demand>>(`/buyers/demand/${demandId}`, data);
         return response.data;
     },
 

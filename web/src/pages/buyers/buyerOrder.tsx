@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   Star,
@@ -12,12 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /* ================= DELIVERY TRACKING ================= */
+import { dealService } from "@/services/dealService";
+import { toast } from "@/hooks/use-toast";
 
 type Delivery = {
   id: string;
   product: string;
   farmer: string;
-  status: "in-transit" | "delivered";
+  status: string; // "in-transit" | "delivered" or others
   currentLocation: string;
   destination: string;
   expectedDelivery: string;
@@ -26,75 +28,121 @@ type Delivery = {
 
 /* ============ DELIVERY TRACKING ============ */
 export function BuyerTracking() {
-  const activeDeliveries: Delivery[] = [
-    {
-      id: "ORD-5020",
-      product: "Organic Tomatoes",
-      farmer: "Green Valley Farms",
-      status: "in-transit",
-      currentLocation: "Panipat",
-      destination: "New Delhi",
-      expectedDelivery: "17 Jan 2024",
-      lastUpdate: "2 hours ago",
-    },
-  ];
+  const [activeDeliveries, setActiveDeliveries] = useState<Delivery[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDeliveries();
+  }, []);
+
+  const fetchDeliveries = async () => {
+    try {
+      const res = await dealService.getMyDeals();
+      const deals = res.data || [];
+      // Filter active
+      const activeDefaults = ['accepted', 'shipped', 'in-transit', 'pending'];
+      const active = deals.filter((d: any) => activeDefaults.includes(d.status));
+
+      const formatted = active.map((d: any) => ({
+        id: `ORD-${d._id.slice(-4).toUpperCase()}`,
+        product: d.cropName || d.crop?.name,
+        farmer: d.farmerName || "Farmer",
+        status: d.status === 'completed' ? 'delivered' : 'in-transit',
+        currentLocation: "Processing Center", // Mock
+        destination: "Your Location", // Mock
+        expectedDelivery: new Date(new Date(d.createdAt).setDate(new Date(d.createdAt).getDate() + 5)).toLocaleDateString(),
+        lastUpdate: "Today"
+      }));
+      setActiveDeliveries(formatted);
+    } catch (e) {
+      console.error("Failed to fetch tracking");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ResponsiveLayout title="Delivery Tracking">
       <div className="space-y-6">
-        {activeDeliveries.map((delivery) => (
-          <Card key={delivery.id}>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>{delivery.id}</span>
-                <Badge
-                  className={
-                    delivery.status === "delivered"
-                      ? "status-success"
-                      : "bg-blue-100 text-blue-700"
-                  }
-                >
-                  {delivery.status === "delivered"
-                    ? "Delivered"
-                    : "In Transit"}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              <div className="border-b pb-4">
-                <p className="text-sm text-muted-foreground">Product</p>
-                <p className="font-semibold">{delivery.product}</p>
-                <p className="text-sm text-muted-foreground">
-                  From {delivery.farmer}
-                </p>
-              </div>
-
-              {/* Timeline */}
-              <div className="space-y-4">
-                <TrackingStep
-                  title="Order Confirmed"
-                  subtitle="Jan 14"
-                  active
-                />
-                <TrackingStep
-                  title="Dispatched"
-                  subtitle="Jan 15"
-                  active
-                />
-                <TrackingStep
-                  title={`In Transit - ${delivery.currentLocation}`}
-                  subtitle={delivery.lastUpdate}
-                  active
-                />
-                <TrackingStep
-                  title={`Delivery to ${delivery.destination}`}
-                  subtitle={`Expected: ${delivery.expectedDelivery}`}
-                />
-              </div>
+        {activeDeliveries.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              No active deliveries at the moment.
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          activeDeliveries.map((delivery) => (
+            <Card key={delivery.id}>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span>{delivery.id}</span>
+                  <Badge
+                    className={
+                      delivery.status === "delivered"
+                        ? "status-success"
+                        : "bg-blue-100 text-blue-700"
+                    }
+                  >
+                    {delivery.status === "delivered"
+                      ? "Delivered"
+                      : "In Transit"}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                <div className="border-b pb-4">
+                  <p className="text-sm text-muted-foreground">Product</p>
+                  <p className="font-semibold">{delivery.product}</p>
+                  <p className="text-sm text-muted-foreground">
+                    From {delivery.farmer}
+                  </p>
+                </div>
+
+                {/* Timeline */}
+                <div className="space-y-4">
+                  {(() => {
+                    const getStepIndex = (status: string) => {
+                      switch (status) {
+                        case 'CREATED': return 0;
+                        case 'CONFIRMED': return 1;
+                        case 'IN_TRANSIT': return 2;
+                        case 'DELIVERED': return 3;
+                        case 'CANCELLED': return -1;
+                        default: return 0;
+                      }
+                    };
+                    const currentStep = getStepIndex(delivery.status);
+
+                    return (
+                      <>
+                        <TrackingStep
+                          title="Order Placed"
+                          subtitle={new Date(new Date().setDate(new Date().getDate() - 2)).toLocaleDateString()} // Mock date
+                          active={currentStep >= 0}
+                        />
+                        <TrackingStep
+                          title="Confirmed"
+                          subtitle="Order accepted by farmer"
+                          active={currentStep >= 1}
+                        />
+                        <TrackingStep
+                          title="In Transit"
+                          subtitle={delivery.status === 'IN_TRANSIT' ? "On the way" : "Pending"}
+                          active={currentStep >= 2}
+                        />
+                        <TrackingStep
+                          title="Delivered"
+                          subtitle={`Expected: ${delivery.expectedDelivery}`}
+                          active={currentStep >= 3}
+                        />
+                      </>
+                    );
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          )))}
       </div>
     </ResponsiveLayout>
   );
@@ -113,14 +161,12 @@ function TrackingStep({
     <div className="flex gap-4">
       <div className="flex flex-col items-center">
         <div
-          className={`w-4 h-4 rounded-full ${
-            active ? "bg-emerald-600" : "bg-gray-300"
-          }`}
+          className={`w-4 h-4 rounded-full ${active ? "bg-emerald-600" : "bg-gray-300"
+            }`}
         />
         <div
-          className={`w-1 h-12 ${
-            active ? "bg-emerald-200" : "bg-gray-200"
-          }`}
+          className={`w-1 h-12 ${active ? "bg-emerald-200" : "bg-gray-200"
+            }`}
         />
       </div>
       <div>
@@ -138,6 +184,7 @@ export function BuyerOrders() {
   const [filterStatus, setFilterStatus] =
     useState<"all" | "pending" | "completed">("all");
 
+  /*
   const orders = [
     {
       id: "ORD-5021",
@@ -148,30 +195,43 @@ export function BuyerOrders() {
       status: "delivered",
       date: "15 Jan 2024",
     },
-    {
-      id: "ORD-5020",
-      farmer: "Green Valley Farms",
-      product: "Tomatoes",
-      quantity: "25kg",
-      total: 6000,
-      status: "in-transit",
-      date: "14 Jan 2024",
-    },
-    {
-      id: "ORD-5019",
-      farmer: "Punjab Harvest",
-      product: "Wheat",
-      quantity: "100 quintals",
-      total: 21500,
-      status: "processing",
-      date: "13 Jan 2024",
-    },
+    ...
   ];
+  */
+
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const response = await dealService.getMyDeals();
+      const data = response.data || [];
+      const formatted = Array.isArray(data) ? data.map((deal: any) => ({
+        id: deal._id,
+        farmer: deal.seller?.name || deal.farmerName || "Unknown Farmer",
+        product: deal.crop?.name || deal.cropName || "Product", // Handle populated crop object
+        quantity: `${deal.quantity} ${deal.unit || 'units'}`,
+        total: deal.totalAmount || 0,
+        status: deal.status, // pending, active, completed, cancelled
+        date: new Date(deal.createdAt).toLocaleDateString(),
+      })) : [];
+      setOrders(formatted);
+    } catch (error) {
+      console.error("Failed to fetch orders", error);
+      toast({ title: "Error", description: "Failed to load orders", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredOrders = orders.filter((o) => {
     if (filterStatus === "all") return true;
-    if (filterStatus === "completed") return o.status === "delivered";
-    return o.status !== "delivered";
+    if (filterStatus === "completed") return o.status === "completed" || o.status === "delivered";
+    return o.status !== "completed" && o.status !== "delivered";
   });
 
   return (
@@ -220,6 +280,27 @@ export function BuyerOrders() {
                 >
                   Track Order
                 </Button>
+                {order.status === 'CREATED' && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="ml-2"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (confirm("Are you sure you want to cancel this order?")) {
+                        try {
+                          await dealService.cancelDeal(order.id);
+                          toast({ title: "Order Cancelled", description: "Your order has been cancelled." });
+                          fetchOrders(); // Refresh list
+                        } catch (err) {
+                          toast({ title: "Error", description: "Failed to cancel order", variant: "destructive" });
+                        }
+                      }
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

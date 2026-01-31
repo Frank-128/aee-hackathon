@@ -26,47 +26,70 @@ type Farmer = {
 };
 
 /* ============ FIND FARMERS ============ */
+import { buyerService } from "@/services/buyerService";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 export function BuyerFarmers() {
-  const farmers = [
-    {
-      id: 1,
-      name: "Kumar Farm Estate",
-      location: "Punjab",
-      rating: 4.8,
-      reviews: 240,
-      products: 15,
-      specialties: ["Rice", "Wheat", "Vegetables"],
-    },
-    {
-      id: 2,
-      name: "Green Valley Farms",
-      location: "Haryana",
-      rating: 4.6,
-      reviews: 185,
-      products: 22,
-      specialties: ["Tomatoes", "Onions", "Potatoes"],
-    },
-    {
-      id: 3,
-      name: "Organic Harvest Co.",
-      location: "Himachal Pradesh",
-      rating: 4.9,
-      reviews: 312,
-      products: 18,
-      specialties: ["Organic Vegetables", "Fruits"],
-    },
-  ];
+  const navigate = useNavigate();
+  const [farmers, setFarmers] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    fetchFarmers();
+  }, []);
+
+  const fetchFarmers = async () => {
+    try {
+      const res = await buyerService.getFarmerListings();
+      const products = res.data || [];
+
+      // Group by farmer
+      const farmerMap = new Map();
+
+      products.forEach((p: any) => {
+        const farmerId = p.farmer?._id || p.farmer;
+        if (!farmerId) return;
+
+        if (!farmerMap.has(farmerId)) {
+          farmerMap.set(farmerId, {
+            id: farmerId,
+            name: p.farmerName || p.farmer?.name || "Unknown Farmer",
+            location: p.farmer?.city || "India", // Mock location if missing
+            rating: 4.5, // Mock
+            reviews: Math.floor(Math.random() * 50) + 1, // Mock
+            products: 0,
+            specialties: new Set()
+          });
+        }
+
+        const entry = farmerMap.get(farmerId);
+        entry.products += 1;
+        entry.specialties.add(p.cropName || p.name);
+      });
+
+      const farmerList = Array.from(farmerMap.values()).map(f => ({
+        ...f,
+        specialties: Array.from(f.specialties).slice(0, 3) // Top 3
+      }));
+      setFarmers(farmerList);
+    } catch (e) {
+      console.error("Failed farmers fetch");
+    }
+  };
+
+  const filteredFarmers = farmers.filter(f => f.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <ResponsiveLayout title="Find Farmers">
       <div className="space-y-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input placeholder="Search farmers..." className="pl-10" />
+          <Input placeholder="Search farmers..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {farmers.map((farmer) => (
+          {filteredFarmers.map((farmer) => (
             <Card key={farmer.id} className="card-hover">
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-2">{farmer.name}</h3>
@@ -94,7 +117,13 @@ export function BuyerFarmers() {
                   </div>
                 </div>
 
-                <Button className="w-full">
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    // Assuming farmer.id matches backend ID style or mapping
+                    navigate("/buyer/messages", { state: { farmerId: farmer.id, farmerName: farmer.name } });
+                  }}
+                >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Contact
                 </Button>

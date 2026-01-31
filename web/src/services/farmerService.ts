@@ -24,6 +24,11 @@ export const farmerService = {
         return response.data;
     },
 
+    getLand: async () => {
+        const response = await api.get<ApiResponse<Land[]>>('/farmers/land');
+        return response.data;
+    },
+
     addCrop: async (data: Omit<Crop, '_id'>) => {
         const response = await api.post<ApiResponse<Crop>>('/farmers/crop', data);
         return response.data;
@@ -31,6 +36,11 @@ export const farmerService = {
 
     getCrops: async () => {
         const response = await api.get<ApiResponse<Crop[]>>('/farmers/crops');
+        return response.data;
+    },
+
+    updateCrop: async (cropId: string, data: Partial<Crop>) => {
+        const response = await api.put<ApiResponse<Crop>>(`/farmers/crop/${cropId}`, data);
         return response.data;
     },
 
@@ -46,6 +56,16 @@ export const farmerService = {
 
     getRecommendedPrice: async (cropId: string) => {
         const response = await api.get<ApiResponse<RecommendedPrice>>(`/farmers/recommended-price/${cropId}`);
+        return response.data;
+    },
+
+    getYieldEstimate: async (cropId: string) => {
+        const response = await api.get<ApiResponse<{ yieldEstimate: number }>>(`/farmers/yield-estimate/${cropId}`);
+        return response.data;
+    },
+
+    getProfitEstimate: async (cropId: string) => {
+        const response = await api.get<ApiResponse<{ profitEstimate: number }>>(`/farmers/profit-estimate/${cropId}`);
         return response.data;
     }
 };

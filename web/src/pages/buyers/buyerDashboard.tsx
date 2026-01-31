@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 // Add missing imports
 import { marketService } from "@/services/marketService";
 import { buyerService } from "@/services/buyerService";
+import { dealService } from "@/services/dealService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 
@@ -31,15 +32,11 @@ export function BuyerDashboard() {
   const [marketPrices, setMarketPrices] = useState<any[]>([]);
   const [smartPicks, setSmartPicks] = useState<any[]>([]);
   const [demands, setDemands] = useState<any[]>([]);
+  const [activeOrder, setActiveOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fallback data if API not ready
-  const activeOrder = {
-    id: "ORD-9021",
-    status: "In-transit from Sangli",
-    progress: "85% Processed",
-    eta: "Today 6:30 PM",
-  };
+  // const activeOrderMock = { ... }; 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +66,22 @@ export function BuyerDashboard() {
             action: "Buy Now"
           }));
           setSmartPicks(picks);
+        }
+
+        // Fetch active order
+        const dealsResponse = await dealService.getMyDeals();
+        const deals = dealsResponse.data || [];
+        // Find most recent active deal
+        const activeDefaults = ['CONFIRMED', 'IN_TRANSIT', 'CREATED'];
+        const active = deals.find((d: any) => activeDefaults.includes(d.status));
+
+        if (active) {
+          setActiveOrder({
+            id: `ORD-${active._id.slice(-4).toUpperCase()}`,
+            status: active.status === 'CREATED' ? 'Processing' : active.status,
+            progress: active.status === 'CREATED' ? 'Order Placed' : 'In Transit',
+            eta: "2-3 days" // Mock ETA for now
+          });
         }
 
       } catch (err) {
@@ -152,44 +165,6 @@ export function BuyerDashboard() {
           </div>
         </section>
 
-        {/* ===== SUPPLY HEATMAP ===== */}
-        <Card className="rounded-2xl shadow-sm">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold">Supply Heatmap</h3>
-              <div className="flex gap-2">
-                <Badge variant="outline">High</Badge>
-                <Badge variant="outline">Low</Badge>
-              </div>
-            </div>
-
-            {/* MAP CONTAINER */}
-            <div className="relative h-[420px] rounded-xl overflow-hidden border bg-muted/30 flex items-center justify-center">
-              {/* <SupplyHeatmap /> */}
-              <p className="text-muted-foreground">Map temporarily disabled</p>
-
-              {/* Overlay Info */}
-              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-xl shadow flex items-center gap-2">
-                <Truck className="w-4 h-4 text-emerald-600" />
-                <p className="text-sm font-medium">
-                  High supply detected in Satara region
-                </p>
-              </div>
-
-              {/* CTA */}
-              <div className="absolute top-4 right-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full bg-white/90 backdrop-blur"
-                  onClick={() => navigate("/buyer/logistics")}
-                >
-                  Find Trucks
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* ===== SMART PICKS ===== */}
         <section>
@@ -224,33 +199,26 @@ export function BuyerDashboard() {
         </section>
 
         {/* ===== ACTIVE ORDER ===== */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4">Active Order</h3>
-          <Card className="rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
-            <CardContent className="p-4 flex justify-between items-center">
-              <div>
-                <p className="font-semibold">#{activeOrder.id}</p>
-                <p className="text-sm text-muted-foreground">
-                  {activeOrder.status}
-                </p>
-                <Badge className="mt-2 bg-blue-100 text-blue-700">
-                  {activeOrder.progress}
-                </Badge>
-              </div>
-              <p className="text-sm font-medium">{activeOrder.eta}</p>
-            </CardContent>
-          </Card>
-        </section>
+        {activeOrder && (
+          <section>
+            <h3 className="text-lg font-semibold mb-4">Active Order</h3>
+            <Card className="rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer" onClick={() => navigate('/buyer/tracking')}>
+              <CardContent className="p-4 flex justify-between items-center">
+                <div>
+                  <p className="font-semibold">#{activeOrder.id}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {activeOrder.status}
+                  </p>
+                  <Badge className="mt-2 bg-blue-100 text-blue-700">
+                    {activeOrder.progress}
+                  </Badge>
+                </div>
+                <p className="text-sm font-medium">ETA: {activeOrder.eta}</p>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
-        {/* ===== VOICE ACTION BUTTON ===== */}
-        <div className="fixed bottom-20 right-6 z-50">
-          <Button
-            size="icon"
-            className="rounded-full h-14 w-14 shadow-xl bg-emerald-600 hover:bg-emerald-700"
-          >
-            <Mic className="w-6 h-6 text-white" />
-          </Button>
-        </div>
 
       </div>
     </ResponsiveLayout>

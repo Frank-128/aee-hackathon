@@ -29,6 +29,12 @@ const cropSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    area: { // Added to support frontend
+        type: Number,
+    },
+    category: { // Added to support frontend
+        type: String,
+    },
     quantityUnit: {
         type: String,
         default: 'kg',

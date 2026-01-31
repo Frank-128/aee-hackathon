@@ -10,6 +10,9 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+
+import BuyerMessages from "./pages/common/Messages";
+
 // farmer imports
 import FarmerDashboard from "./pages/farmer/farmerDashboard";
 import FarmerProducts from "./pages/farmer/farmerProducts";
@@ -23,7 +26,8 @@ import {
   FarmerEarnings,
   FarmerFarmProfile,
   FarmerLearn,
-  FarmerInventory, FarmerNotifications,
+  FarmerInventory,
+  FarmerNotifications,
   FarmerWeather,
 } from "./pages/farmer/farmerPages"
 import FarmerMessages from "./pages/common/Messages";
@@ -41,9 +45,9 @@ import { BuyerReviews } from "./pages/buyers/buyerReviews";
 
 import BuyerProfile from "./pages/buyers/buyerProfile";
 import BuyerInvoice from "./pages/buyers/buyerInvoice"
-import BuyerMessages from "./pages/buyers/buyerMessages"
 import { BuyerMarket } from "./pages/buyers/buyerMarket"
 import { MarketProductDetails } from "./pages/buyers/buyerProductDetails"
+import { InvestorDashboard } from "./pages/investor/investorDashboard";
 
 // admin imports
 import {
@@ -92,6 +96,7 @@ const App = () => (
           <Route path="/farmer/messages" element={<ProtectedRoute allowedRoles={['farmer']}><FarmerMessages /></ProtectedRoute>} />
           <Route path="/farmer/help" element={<ProtectedRoute allowedRoles={['farmer']}><FarmerHelp /></ProtectedRoute>} />
           <Route path="/farmer/profile" element={<ProtectedRoute allowedRoles={['farmer']}><FarmerProfile /></ProtectedRoute>} />
+          <Route path="/farmer/farm-profile" element={<ProtectedRoute allowedRoles={['farmer']}><FarmerFarmProfile /></ProtectedRoute>} />
 
           {/* Buyer Routes */}
           <Route path="/buyer/dashboard" element={<ProtectedRoute allowedRoles={['buyer']}><BuyerDashboard /></ProtectedRoute>} />

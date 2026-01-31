@@ -47,6 +47,7 @@ export default function FarmerProducts() {
   const [cropName, setCropName] = useState<string>("wheat");
   const [quantity, setQuantity] = useState("");
   const [area, setArea] = useState("");
+  const [dates, setDates] = useState({ sowing: "", harvest: "" });
 
   // Static AI prices for now (can be enhanced later)
   const aiPriceMin = 2100;
@@ -101,11 +102,13 @@ export default function FarmerProducts() {
         name: cropName,
         category: "grain",
         area: Number(area),
-        expectedYield: Number(quantity),
-        status: "active" as any,
+        quantityExpected: Number(quantity),
+        sowingDate: dates.sowing ? new Date(dates.sowing) : new Date(),
+        harvestDateExpeted: dates.harvest ? new Date(dates.harvest) : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // Default 90 days
+        status: "PLANTED",
         pricePerUnit: aiPriceMin,
-        unit: "quintal",
-      });
+        quantityUnit: "quintal",
+      } as any);
 
       const newCrop = response.data as ProductListing;
       setProducts([...products, newCrop]);
@@ -214,28 +217,54 @@ export default function FarmerProducts() {
                 </div>
               </section>
 
-              {/* STEP 2 - Area */}
-              <section>
-                <p className="font-semibold mb-2">Area (acres)</p>
-                <Input
-                  type="number"
-                  placeholder="00"
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
-                  className="text-xl font-bold"
-                />
-              </section>
+
 
               {/* STEP 3 - Quantity */}
               <section>
-                <p className="font-semibold mb-2">Expected Yield (quintals)</p>
-                <Input
-                  type="number"
-                  placeholder="00"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className="text-xl font-bold"
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="font-semibold mb-2">My Yield (quintals)</p>
+                    <Input
+                      type="number"
+                      placeholder="00"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      className="text-xl font-bold"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold mb-2">Area (acres)</p>
+                    <Input
+                      type="number"
+                      placeholder="00"
+                      value={area}
+                      onChange={(e) => setArea(e.target.value)}
+                      className="text-xl font-bold"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* STEP 4 - Dates */}
+              <section>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="font-semibold mb-2">Sowing Date</p>
+                    <Input
+                      type="date"
+                      id="sowingDate" // Add ID to avoid label issues if any
+                      onChange={(e) => setDates(prev => ({ ...prev, sowing: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold mb-2">Expected Harvest</p>
+                    <Input
+                      type="date"
+                      id="harvestDate"
+                      onChange={(e) => setDates(prev => ({ ...prev, harvest: e.target.value }))}
+                    />
+                  </div>
+                </div>
               </section>
 
               {/* AI PRICE */}
