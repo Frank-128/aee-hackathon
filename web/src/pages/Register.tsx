@@ -209,7 +209,7 @@ const Register = () => {
         <div className="relative z-10">
           <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold font-display">
             <ShieldCheck className="w-8 h-8 text-emerald-400" />
-            AgriMarket
+            RHINO
           </Link>
         </div>
 
